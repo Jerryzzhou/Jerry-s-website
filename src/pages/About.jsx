@@ -1,6 +1,7 @@
 import React from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { getAssetPath } from "../utils/paths";
 
 export default function About({ backgroundPath }) {
     const navigate = useNavigate();
@@ -22,7 +23,7 @@ export default function About({ backgroundPath }) {
     const bioContentTopPadding = "120px";    // Vertical position of text inside background
 
     // --- BIO BACKGROUND & FRAME STYLES ---
-    const bioBackgroundUrl = "/pixel-bg.png";
+    const bioBackgroundUrl = getAssetPath("/pixel-bg.png");
     const bioBackgroundSize = "auto 100%";   // Matches height exactly, scales width to maintain ratio
     const bioBackgroundPosition = "center -70px"; // User's preferred position
     const bioBackgroundRotate = "180deg";
@@ -131,7 +132,7 @@ export default function About({ backgroundPath }) {
                 <div className="flex items-center gap-3">
                     <div className="w-8 h-8 relative">
                         <img
-                            src="/avatar.png"
+                            src={getAssetPath("/avatar.png")}
                             alt="icon"
                             className="absolute top-1/2 left-[-25px] -translate-y-1/2 w-14 h-14 max-w-none object-contain invert"
                         />

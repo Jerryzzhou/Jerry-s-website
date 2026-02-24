@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { getAssetPath } from "../utils/paths";
 import "./phoalbum-book.css";
 
 export default function PhoalbumBook({
@@ -136,7 +137,7 @@ export default function PhoalbumBook({
               onClick={handleOpen}
               style={{ left: hintX, top: hintY, scale: hintScale, rotate: -5 }}
             >
-              <img src="/cover_arrow.png" alt="Click the book" className="click-hint-img" />
+              <img src={getAssetPath("/cover_arrow.png")} alt="Click the book" className="click-hint-img" />
             </motion.div>
           )}
         </AnimatePresence>

@@ -5,6 +5,7 @@ import FallingWords from "../components/FallingWords";
 import PhoalbumBook from "../components/PhoalbumBook";
 import InspirationWords from "../components/InspirationWords";
 import BackgroundSlider from "../components/BackgroundSlider";
+import { getAssetPath } from "../utils/paths";
 
 export default function LandingPage() {
     const heroRef = useRef(null);
@@ -605,7 +606,7 @@ export default function LandingPage() {
                                     style={{ transform: "rotate(-5.36deg)" }}
                                 >
                                     <img
-                                        src="/underline.png"
+                                        src={getAssetPath("/underline.png")}
                                         alt=""
                                         className="w-full"
                                         style={{ marginTop: "51px", transform: "rotate(5deg) scale(0.85)" }}
@@ -617,7 +618,7 @@ export default function LandingPage() {
                                     className="relative mx-auto w-[168px] md:w-[228px] mt-8 md:mt-0"
                                     style={{ marginTop: "-10px" }}
                                 >
-                                    <img src="/myImage.png" alt="Portrait" className="w-full h-auto" />
+                                    <img src={getAssetPath("/myImage.png")} alt="Portrait" className="w-full h-auto" />
 
                                     {/* Jerry.Z Tag - Attached to portrait */}
                                     <div
@@ -917,7 +918,7 @@ export default function LandingPage() {
                                 }}
                                 transition={{ delay: 0.7, duration: 0.25, ease: [0.76, 0, 0.24, 1] }}
                             >
-                                <img src="/videos-section-img.png" alt="" className="w-full h-auto" />
+                                <img src={getAssetPath("/enter-arrow.png")} alt="" className="w-full h-auto" />
                             </motion.div>
 
                             {/* Right Side: Larger Video Area */}

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
+import { getAssetPath } from "../utils/paths";
 
 export default function Navbar() {
   const [hoveredLink, setHoveredLink] = useState(null);
@@ -123,7 +124,7 @@ export default function Navbar() {
                     >
                       <span className="whitespace-nowrap">Selected Works</span>
                       <img
-                        src="/icons/vector-arrow.svg"
+                        src={getAssetPath("/icons/vector-arrow.svg")}
                         alt=""
                         className={`w-3 h-3 transition-transform duration-200 ${isSubmenuHovered ? 'rotate-0' : '-rotate-90'} ${(isSubmenuHovered && !isDark) || (!isSubmenuHovered && isDark) ? 'invert' : ''
                           }`}

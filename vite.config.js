@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
+// 🚀 Triggering fresh build for deployment verification
 export default defineConfig(({ command }) => {
   return {
     plugins: [react()],

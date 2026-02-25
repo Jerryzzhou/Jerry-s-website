@@ -240,7 +240,7 @@ export default function PhoalbumBook({
                 alt="page"
                 draggable="false"
                 style={{ objectFit: "cover", background: "#fff" }}
-                loading="lazy"
+                loading="eager"
               />
             ) : (
               <div className="page-placeholder">EMPTY</div>
@@ -260,7 +260,7 @@ export default function PhoalbumBook({
                 alt="page"
                 draggable="false"
                 style={{ objectFit: "cover", background: "#fff" }}
-                loading="lazy"
+                loading="eager"
               />
             ) : (
               <div className="page-placeholder">EMPTY</div>
@@ -293,14 +293,14 @@ export default function PhoalbumBook({
         <div style={{ display: "none" }}>
           {spreads[index - 1] && (
             <>
-              <img src={spreads[index - 1][0]?.src} alt="preload" loading="lazy" />
-              <img src={spreads[index - 1][1]?.src} alt="preload" loading="lazy" />
+              <img src={spreads[index - 1][0]?.src} alt="preload" loading="eager" />
+              <img src={spreads[index - 1][1]?.src} alt="preload" loading="eager" />
             </>
           )}
           {spreads[index + 1] && (
             <>
-              <img src={spreads[index + 1][0]?.src} alt="preload" loading="lazy" />
-              <img src={spreads[index + 1][1]?.src} alt="preload" loading="lazy" />
+              <img src={spreads[index + 1][0]?.src} alt="preload" loading="eager" />
+              <img src={spreads[index + 1][1]?.src} alt="preload" loading="eager" />
             </>
           )}
         </div>
@@ -397,12 +397,12 @@ function TurnLeaf({ side = "right", frontSrc, backSrc, onComplete }) {
       style={{ transformOrigin: isRight ? "left center" : "right center" }}
     >
       <div className="leaf-face leaf-front">
-        <img src={frontSrc} alt="" draggable="false" style={{ objectFit: "cover", background: "#fff", width: "100%", height: "100%" }} loading="lazy" />
+        <img src={frontSrc} alt="" draggable="false" style={{ objectFit: "cover", background: "#fff", width: "100%", height: "100%" }} loading="eager" />
         <div className={`page-spine-shadow ${isRight ? 'shadow-right' : 'shadow-left'}`} />
         <div className="page-gloss" />
       </div>
       <div className="leaf-face leaf-back with-tint">
-        {backSrc && <img src={backSrc} alt="" draggable="false" style={{ objectFit: "cover", background: "#fff", width: "100%", height: "100%" }} loading="lazy" />}
+        {backSrc && <img src={backSrc} alt="" draggable="false" style={{ objectFit: "cover", background: "#fff", width: "100%", height: "100%" }} loading="eager" />}
         <div className={`page-spine-shadow ${isRight ? 'shadow-left' : 'shadow-right'}`} />
         <div className="page-gloss" />
       </div>

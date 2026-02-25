@@ -385,7 +385,7 @@ export default function LandingPage() {
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: 0 }}
             transition={{ duration: 0.7, ease: [0.76, 0, 0.24, 1] }}
-            className="relative min-h-screen bg-[#F2F2F2] text-[#111] overflow-x-hidden pt-16"
+            className="relative min-h-[100dvh] bg-[#F2F2F2] text-[#111] overflow-x-hidden pt-16"
         >
             {/* Add Inspiration Overlay - Moved to top-level for consistent centering */}
             <AnimatePresence>
@@ -559,7 +559,7 @@ export default function LandingPage() {
             </motion.div>
 
             {/* Hero Section */}
-            <section ref={heroRef} className="relative h-screen px-4 pt-0 overflow-hidden overscroll-none">
+            <section ref={heroRef} className="relative min-h-[100dvh] px-4 pt-0 overflow-hidden">
                 {/* --- PHASE 1 CONTAINER --- */}
                 <motion.div
                     className="absolute inset-0 w-full h-full"

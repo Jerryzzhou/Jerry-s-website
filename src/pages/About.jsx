@@ -46,7 +46,7 @@ export default function About({ backgroundPath }) {
     const bioOverlayBorderRadius = "8px";
 
     // --- HERO BACKGROUND CONFIGURATION (New) ---
-    const heroBgImg = '/居中背景图.png';
+    const heroBgImg = getAssetPath('/about-bg-center.png');
     const heroBgSize = '45%';         // This controls the size of the background image
     const heroBgPos = 'center 45%';   // This controls the position (horizontal vertical)
 
@@ -118,7 +118,7 @@ export default function About({ backgroundPath }) {
                 top: 0,
                 left: 0,
                 width: "100%",
-                height: "100vh",
+                height: "100dvh",
                 zIndex: 10000,
                 backgroundColor: "#222222",
                 overflowY: "auto",
@@ -188,18 +188,21 @@ export default function About({ backgroundPath }) {
                         alt=""
                         className={`absolute z-30 pointer-events-none ${imgDesignerScale} ${imgDesignerSize}`}
                         style={{ top: imgDesignerPos.top, left: imgDesignerPos.left }}
+                        loading="lazy"
                     />
                     <img
                         src={getAssetPath("/group-38.png")}
                         alt=""
                         className={`absolute z-30 pointer-events-none ${imgGroup38Scale} ${imgGroup38Size}`}
                         style={{ top: imgGroup38Pos.top, right: imgGroup38Pos.right }}
+                        loading="lazy"
                     />
                     <img
                         src={getAssetPath("/group-1739332834.png")}
                         alt=""
                         className={`absolute z-30 pointer-events-none ${imgGroupNewScale} ${imgGroupNewSize}`}
                         style={{ bottom: imgGroupNewPos.bottom, left: imgGroupNewPos.left }}
+                        loading="lazy"
                     />
 
 
@@ -231,7 +234,7 @@ export default function About({ backgroundPath }) {
                                 scale: photo1Scale,
                             }}
                         >
-                            <img src={getAssetPath("/photos/hero-1.png")} alt="" className="w-full h-auto" />
+                            <img src={getAssetPath("/photos/hero-1.png")} alt="" className="w-full h-auto" loading="lazy" />
                         </motion.div>
                     </motion.div>
 
@@ -263,7 +266,7 @@ export default function About({ backgroundPath }) {
                                 scale: photo2Scale,
                             }}
                         >
-                            <img src={getAssetPath("/photos/hero-2.png")} alt="" className="w-full h-auto" />
+                            <img src={getAssetPath("/photos/hero-2.png")} alt="" className="w-full h-auto" loading="lazy" />
                         </motion.div>
                     </motion.div>
 
@@ -295,7 +298,7 @@ export default function About({ backgroundPath }) {
                                 scale: photo3Scale,
                             }}
                         >
-                            <img src={getAssetPath("/photos/hero-3.png")} alt="" className="w-full h-auto" />
+                            <img src={getAssetPath("/photos/hero-3.png")} alt="" className="w-full h-auto" loading="lazy" />
                         </motion.div>
                     </motion.div>
 
@@ -327,7 +330,7 @@ export default function About({ backgroundPath }) {
                                 scale: photo4Scale,
                             }}
                         >
-                            <img src={getAssetPath("/photos/hero-4.png")} alt="" className="w-full h-auto" />
+                            <img src={getAssetPath("/photos/hero-4.png")} alt="" className="w-full h-auto" loading="lazy" />
                         </motion.div>
                     </motion.div>
                 </div>
@@ -452,7 +455,7 @@ export default function About({ backgroundPath }) {
 
                         {/* Thank You Image - Bottom Left within the same area */}
                         <div className="absolute bottom-0 left-0 w-72 md:w-[900px] translate-y-[20%]">
-                            <img src={getAssetPath("/thank-you-group.png")} alt="Thank you" className="w-full h-auto" />
+                            <img src={getAssetPath("/thank-you-group.png")} alt="Thank you" className="w-full h-auto" loading="lazy" />
                         </div>
                     </div>
                 </div>

@@ -53,6 +53,7 @@ export default function FlipBookGallery({ items }) {
                                 src={item.src}
                                 alt={item.alt}
                                 className="w-full h-full object-cover grayscale brightness-90 contrast-125 hover:grayscale-0 transition-all duration-500"
+                                loading="lazy"
                             />
                         </div>
                         <div className="text-center font-mono text-xs text-gray-500">

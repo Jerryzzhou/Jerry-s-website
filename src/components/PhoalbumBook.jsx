@@ -137,7 +137,7 @@ export default function PhoalbumBook({
               onClick={handleOpen}
               style={{ left: hintX, top: hintY, scale: hintScale, rotate: -5 }}
             >
-              <img src={getAssetPath("/cover_arrow.png")} alt="Click the book" className="click-hint-img" />
+              <img src={getAssetPath("/cover_arrow.png")} alt="Click the book" className="click-hint-img" loading="lazy" />
             </motion.div>
           )}
         </AnimatePresence>
@@ -185,6 +185,7 @@ export default function PhoalbumBook({
                       alt="Phoalbum Cover"
                       className="cover-img"
                       style={{ objectFit: "cover", background: "#fff" }}
+                      loading="lazy"
                     />
                     <div className="cover-glare" />
                   </div>
@@ -193,6 +194,7 @@ export default function PhoalbumBook({
                     alt="Cover Overlay"
                     className="cover-overlay-img"
                     style={{ transform: `scale(${overlayScale})` }}
+                    loading="lazy"
                   />
                 </div>
               </motion.div>
@@ -238,6 +240,7 @@ export default function PhoalbumBook({
                 alt="page"
                 draggable="false"
                 style={{ objectFit: "cover", background: "#fff" }}
+                loading="lazy"
               />
             ) : (
               <div className="page-placeholder">EMPTY</div>
@@ -257,6 +260,7 @@ export default function PhoalbumBook({
                 alt="page"
                 draggable="false"
                 style={{ objectFit: "cover", background: "#fff" }}
+                loading="lazy"
               />
             ) : (
               <div className="page-placeholder">EMPTY</div>
@@ -289,14 +293,14 @@ export default function PhoalbumBook({
         <div style={{ display: "none" }}>
           {spreads[index - 1] && (
             <>
-              <img src={spreads[index - 1][0]?.src} alt="preload" />
-              <img src={spreads[index - 1][1]?.src} alt="preload" />
+              <img src={spreads[index - 1][0]?.src} alt="preload" loading="lazy" />
+              <img src={spreads[index - 1][1]?.src} alt="preload" loading="lazy" />
             </>
           )}
           {spreads[index + 1] && (
             <>
-              <img src={spreads[index + 1][0]?.src} alt="preload" />
-              <img src={spreads[index + 1][1]?.src} alt="preload" />
+              <img src={spreads[index + 1][0]?.src} alt="preload" loading="lazy" />
+              <img src={spreads[index + 1][1]?.src} alt="preload" loading="lazy" />
             </>
           )}
         </div>
@@ -337,6 +341,7 @@ export default function PhoalbumBook({
                   width: 'auto',
                   transform: 'translateY(1px)' /* ▲ 微调箭头的垂直对齐 */
                 }}
+                loading="lazy"
               />
             </div>
           </>
@@ -392,12 +397,12 @@ function TurnLeaf({ side = "right", frontSrc, backSrc, onComplete }) {
       style={{ transformOrigin: isRight ? "left center" : "right center" }}
     >
       <div className="leaf-face leaf-front">
-        <img src={frontSrc} alt="" draggable="false" style={{ objectFit: "cover", background: "#fff", width: "100%", height: "100%" }} />
+        <img src={frontSrc} alt="" draggable="false" style={{ objectFit: "cover", background: "#fff", width: "100%", height: "100%" }} loading="lazy" />
         <div className={`page-spine-shadow ${isRight ? 'shadow-right' : 'shadow-left'}`} />
         <div className="page-gloss" />
       </div>
       <div className="leaf-face leaf-back with-tint">
-        {backSrc && <img src={backSrc} alt="" draggable="false" style={{ objectFit: "cover", background: "#fff", width: "100%", height: "100%" }} />}
+        {backSrc && <img src={backSrc} alt="" draggable="false" style={{ objectFit: "cover", background: "#fff", width: "100%", height: "100%" }} loading="lazy" />}
         <div className={`page-spine-shadow ${isRight ? 'shadow-left' : 'shadow-right'}`} />
         <div className="page-gloss" />
       </div>

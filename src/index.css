@@ -16,6 +16,7 @@
   src: url('/fonts/HYPixel11pxJ-2.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
@@ -23,6 +24,7 @@
   src: url('/fonts/小豆岛桃源乡简繁-闪REEJI-Xiaodou-Utopia.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
@@ -30,6 +32,7 @@
   src: url('/fonts/HYPixel11pxJ-2.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
@@ -37,11 +40,12 @@
   src: url('/fonts/点点像素体-方形.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
+  font-display: swap;
 }
 
 html,
 body {
-  height: 100%;
+  min-height: 100%;
   overflow-x: hidden;
   scroll-behavior: smooth;
   font-family: 'DotPixel', 'Courier New', monospace;

@@ -578,7 +578,7 @@ export default function LandingPage() {
             </motion.div>
 
             {/* Hero Section */}
-            <section ref={heroRef} className="relative min-h-[100dvh] px-4 pt-0 overflow-hidden">
+            <section ref={heroRef} className="relative h-screen px-4 pt-0 overflow-hidden overscroll-none">
                 {/* --- PHASE 1 CONTAINER --- */}
                 <motion.div
                     className="absolute inset-0 w-full h-full"

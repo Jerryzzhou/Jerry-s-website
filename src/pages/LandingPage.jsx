@@ -918,12 +918,7 @@ export default function LandingPage() {
                                 }}
                                 transition={{ delay: 0.7, duration: 0.25, ease: [0.76, 0, 0.24, 1] }}
                             >
-                                <img
-                                    src={getAssetPath("/enter-arrow.png")}
-                                    alt=""
-                                    className="w-full h-auto"
-                                    style={{ filter: "invert(1) brightness(2)" }}
-                                />
+                                <img src={getAssetPath("/videos-section-img.png")} alt="" className="w-full h-auto" />
                             </motion.div>
 
                             {/* Right Side: Larger Video Area */}

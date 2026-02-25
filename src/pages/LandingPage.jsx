@@ -250,11 +250,30 @@ export default function LandingPage() {
             }
         };
         window.addEventListener("wheel", handleWheel, { passive: false });
+
+        // --- MOBILE TOUCH SUPPORT ---
+        // Touch events mirror the wheel handler so mobile users can swipe between sections.
+        let touchStartY = 0;
+        const handleTouchStart = (e) => {
+            touchStartY = e.touches[0].clientY;
+        };
+        const handleTouchMove = (e) => {
+            if (window.location.hash.includes("/about") || isAboutPageActiveRef.current) return;
+            // Simulate deltaY from swipe direction (inverted: swipe up = scroll down)
+            const deltaY = touchStartY - e.touches[0].clientY;
+            if (Math.abs(deltaY) < 5) return; // ignore tiny movements
+            handleWheel({ deltaY, preventDefault: () => { try { e.preventDefault(); } catch (err) { } } });
+            touchStartY = e.touches[0].clientY; // update so continuous swipe feels smooth
+        };
+        window.addEventListener("touchstart", handleTouchStart, { passive: true });
+        window.addEventListener("touchmove", handleTouchMove, { passive: false });
+
         return () => {
             document.body.style.overflow = previousOverflow || "";
             window.removeEventListener("resize", updateMax);
-            window.removeEventListener("resize", updateMax);
             window.removeEventListener("wheel", handleWheel);
+            window.removeEventListener("touchstart", handleTouchStart);
+            window.removeEventListener("touchmove", handleTouchMove);
         };
     }, [maxVirtualScroll, isPhoalbumActive, isVideosActive, isWorksActive, location.pathname, isWorksEntering]);
 
@@ -581,10 +600,9 @@ export default function LandingPage() {
                                     className="absolute z-20 font-['Xiaodou'] text-[#000000]"
                                     style={{
                                         top: `${soTextTop}px`,
-                                        left: `calc(5% + ${topTextOffsetX}px)`, // Mobile fallbook + offset
-                                        md: { left: soTextLeft }, // Note: React style doesn't handle media queries directly, so we use className for responsive and style for dynamic
+                                        left: `calc(5% + ${topTextOffsetX}px)`,
                                         transform: "rotate(-5.36deg)",
-                                        fontSize: "65px"
+                                        fontSize: window.innerWidth < 768 ? "42px" : "65px"
                                     }}
                                 >
                                     <div className="hidden md:block absolute" style={{ left: soTextLeft }} />
@@ -620,9 +638,9 @@ export default function LandingPage() {
                                 >
                                     <img src={getAssetPath("/myImage.png")} alt="Portrait" className="w-full h-auto" />
 
-                                    {/* Jerry.Z Tag - Attached to portrait */}
+                                    {/* Jerry.Z Tag - Hidden on mobile to avoid overflow */}
                                     <div
-                                        className="absolute top-[62%] left-[100%] ml-4 z-30 pointer-events-none"
+                                        className="absolute top-[62%] left-[100%] ml-4 z-30 pointer-events-none hidden md:block"
                                         style={{ opacity: revealProgress }}
                                     >
                                         <div className="relative">
@@ -641,9 +659,9 @@ export default function LandingPage() {
 
                                 {/* Bottom description (TOP TEXT GROUP) */}
                                 <div
-                                    className="mt-12 md:mt-10 max-w-3xl ml-[10%] md:ml-[-3.5%] text-left font-['Xiaodou'] text-[#545454]"
+                                    className="mt-12 md:mt-10 max-w-3xl ml-[5%] md:ml-[-3.5%] text-left font-['Xiaodou'] text-[#545454]"
                                     style={{
-                                        fontSize: "18px",
+                                        fontSize: window.innerWidth < 768 ? "15px" : "18px",
                                         transform: `rotate(-2.35deg) translateX(${topTextOffsetX}px)`,
                                         fontWeight: "normal",
                                         opacity: fadeOut
@@ -711,13 +729,13 @@ export default function LandingPage() {
                             }}
                         >
                             <div className="relative">
-                                <p className="mb-2 text-[#000000] font-['HYPixel']" style={{ fontSize: "40px" }}>
+                                <p className="mb-2 text-[#000000] font-['HYPixel']" style={{ fontSize: window.innerWidth < 768 ? '26px' : '40px' }}>
                   // And__what is this website about??
                                 </p>
                             </div>
                             <div
                                 className="flex flex-col md:flex-row md:items-stretch justify-between text-[#545454] font-['HYPixel']"
-                                style={{ fontSize: "20px", gap: "60px" }}
+                                style={{ fontSize: window.innerWidth < 768 ? '15px' : '20px', gap: window.innerWidth < 768 ? '20px' : '60px' }}
                             >
                                 <p
                                     className="text-left whitespace-normal shrink-0 relative"
@@ -828,7 +846,7 @@ export default function LandingPage() {
                                 animate={{ opacity: isPhoalbumActive ? 1 : 0, y: isPhoalbumActive ? 0 : 10 }}
                                 transition={{ delay: 0.7, duration: 0.25, ease: [0.76, 0, 0.24, 1] }}
                             >
-                                <Link to="/gallery" className="group block w-[420px]">
+                                <Link to="/gallery" className="group block w-full md:w-[420px]">
                                     <motion.div
                                         whileHover="hover"
                                         className="relative border border-[#111] h-[124px] bg-transparent group-hover:bg-[#111] transition-colors duration-300 p-6 flex flex-col justify-between"
@@ -912,9 +930,9 @@ export default function LandingPage() {
                                 className="w-full md:w-[35%]"
                                 animate={{
                                     opacity: isVideosActive ? 1 : 0,
-                                    scale: 0.8, // Constant scale
-                                    x: 676, // Constant position
-                                    y: -40  // Constant position
+                                    scale: window.innerWidth >= 768 ? 0.8 : 1,
+                                    x: window.innerWidth >= 768 ? 676 : 0,
+                                    y: window.innerWidth >= 768 ? -40 : 0
                                 }}
                                 transition={{ delay: 0.7, duration: 0.25, ease: [0.76, 0, 0.24, 1] }}
                             >
@@ -927,8 +945,8 @@ export default function LandingPage() {
                                     className="aspect-video bg-black/40 border border-white/20 group overflow-hidden relative"
                                     animate={{
                                         opacity: isVideosActive ? 1 : 0,
-                                        x: -484,   // Constant position
-                                        y: -10     // Constant position
+                                        x: window.innerWidth >= 768 ? -484 : 0,
+                                        y: window.innerWidth >= 768 ? -10 : 0
                                     }}
                                     transition={{ delay: 0.8, duration: 0.25, ease: [0.76, 0, 0.24, 1] }}
                                 >
@@ -950,15 +968,15 @@ export default function LandingPage() {
                                 </motion.div>
 
                                 <motion.div
-                                    className="mt-16 self-end" // Sync margin and alignment
+                                    className="mt-16 self-end"
                                     animate={{
                                         opacity: isVideosActive ? 1 : 0,
-                                        x: isVideosActive ? 86 : 96,  // Offset from final position
-                                        y: isVideosActive ? -240 : -230
+                                        x: window.innerWidth >= 768 ? (isVideosActive ? 86 : 96) : 0,
+                                        y: window.innerWidth >= 768 ? (isVideosActive ? -240 : -230) : 0
                                     }}
                                     transition={{ delay: 0.9, duration: 0.25, ease: [0.76, 0, 0.24, 1] }}
                                 >
-                                    <Link to="/videos" className="group block w-[535px]">
+                                    <Link to="/videos" className="group block w-full md:w-[535px]">
                                         <div className="relative border border-white h-[124px] bg-transparent group-hover:bg-white transition-colors duration-300 p-6 flex flex-col justify-between">
                                             <div className="flex justify-end transition-all duration-300 group-hover:translate-x-2">
                                                 <span className="font-['DotPixel'] text-white group-hover:text-[#222] text-[20px] transition-colors duration-300">

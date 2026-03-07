@@ -9,7 +9,10 @@
   /* 或者修改这里的 paddingTop (24px) 也能影响上下距离 */
   padding: 15px 0 8px;
   perspective: 1800px;
+  -webkit-perspective: 1800px;
   /* 立体深度 */
+  transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
   user-select: none;
   pointer-events: none;
   /* 默认穿透，避免遮挡背后网格 */
@@ -32,6 +35,7 @@
   aspect-ratio: 2 / 1;
   /* 两页合起来是2:1，每页是1:1 */
   transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
 }
 
 /* ===== 书脊（中缝）内嵌阴影 ===== */
@@ -82,6 +86,8 @@
   height: 100%;
   overflow: hidden;
   background: #fff;
+  transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
 }
 
 .page-left {
@@ -143,6 +149,8 @@
 
 .page-right.interactive-page:hover {
   transform: rotateY(-8deg);
+  -webkit-transform: rotateY(-8deg);
+  z-index: 50 !important;
   box-shadow:
     inset 14px 0 28px rgba(0, 0, 0, 0.25),
     12px 14px 25px rgba(0, 0, 0, 0.2) !important;
@@ -150,6 +158,8 @@
 
 .page-left.interactive-page:hover {
   transform: rotateY(8deg);
+  -webkit-transform: rotateY(8deg);
+  z-index: 50 !important;
   box-shadow:
     inset -14px 0 28px rgba(0, 0, 0, 0.25),
     -12px 14px 25px rgba(0, 0, 0, 0.2) !important;
@@ -163,7 +173,7 @@
   height: 100%;
   transform-style: preserve-3d;
   -webkit-transform-style: preserve-3d;
-  z-index: 50;
+  z-index: 100;
 }
 
 /* 右翻页：从右到左覆盖 */
@@ -207,7 +217,7 @@
 
 /* 背面：纸色/纸纹 + 轻噪点（翻过去背面可见） */
 .leaf-back {
-  transform: rotateY(180deg);
+  transform: rotateY(180deg) translateZ(0.01px);
   background: #f4f1e6;
 }
 
@@ -310,6 +320,7 @@
 /* ===== 闭合状态与展开动画 ===== */
 .book-wrap.is-closed {
   perspective: 2000px;
+  -webkit-perspective: 2000px;
   padding: 0;
   margin: 0 auto !important;
   /* 👈 强制居中，修复左右偏移 */
@@ -329,10 +340,17 @@
   transform: rotateX(calc(var(--mouse-y, 0) * 10deg)) rotateY(calc(var(--mouse-x, 0) * 15deg)) translateZ(0px) !important;
   transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
   transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
   width: 50%;
   aspect-ratio: 1 / 1;
   margin: 0 auto;
   /* overflow 移至 cover-visual-content，不在这里裁副以保留阴影 */
+}
+
+
+/* Add an active press state so it feels consistent with flipping */
+.book-wrap.is-closed .book:active {
+  transform: rotateX(calc(var(--mouse-y, 0) * 4deg)) rotateY(calc(var(--mouse-x, 0) * 5deg)) scale(0.98) translateZ(0px) !important;
 }
 
 .book-wrap.is-open .book {

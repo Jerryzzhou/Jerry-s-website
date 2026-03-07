@@ -1,13 +1,31 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import PhoalbumBook from "../components/PhoalbumBook";
 import PhoalbumGrid from "../components/PhoalbumGrid";
 import { getAssetPath } from "../utils/paths";
 
 export default function Gallery() {
+  const location = useLocation();
   const [isBookOpen, setIsBookOpen] = useState(false);
   const [isTurning, setIsTurning] = useState(false);
   const [targetIndex, setTargetIndex] = useState(null);
+
+  // Sync state with router location (fixes submenu navigation)
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const view = searchParams.get('view');
+
+    // Priority 1: Search params (forced via Navbar)
+    if (view === 'book') {
+      setIsBookOpen(true);
+    } else if (view === 'overview') {
+      setIsBookOpen(false);
+    } else {
+      // Priority 2: Location state (previous logic)
+      setIsBookOpen(!!location.state?.openBook);
+    }
+  }, [location.state, location.search, location.key]);
 
   const handleChapterSelect = (slug) => {
     const indexMap = {
@@ -112,7 +130,9 @@ export default function Gallery() {
         >
           <PhoalbumBook
             items={deckItems}
-            isInitialClosed={true}
+            isOpen={isBookOpen}
+            showHint={!isBookOpen}
+            isInitialClosed={!(location.state?.openBook)}
             showControls={true}
             hintX={35}
             hintY="-16%"

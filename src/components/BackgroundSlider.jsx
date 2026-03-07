@@ -21,9 +21,9 @@ const IMAGE_ROW_GAP = 60;
 const IMAGE_HORIZONTAL_GAP = 64; // Horizontal gap between images (px)
 
 // Animation Speeds (Lower = Faster)
-const TEXT_SPEED_NORMAL = 120; // Increased from 60 (Slower)
-const TEXT_SPEED_SLOW = 70;   // Increased from 80 (Slower)
-const IMAGE_SPEED = 60;
+const TEXT_SPEED_NORMAL = 80; // Fast background
+const TEXT_SPEED_SLOW = 100;
+const IMAGE_SPEED = 100;      // Slow foreground (Line 26)
 
 // Images List (Project Works)
 const PROJECT_IMAGES = [

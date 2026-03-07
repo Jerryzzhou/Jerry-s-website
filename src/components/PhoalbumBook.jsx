@@ -23,7 +23,9 @@ export default function PhoalbumBook({
   onTurnChange = null,    // 👈 翻页状态回调
   onIndexChange = null,   // 👈 新增：页码索引回调
   targetIndex = null,     // 👈 新增：外部控制跳转的页码
-  className = ""           // 👈 允许外部传入自定义类名以隔离样式
+  className = "",           // 👈 允许外部传入自定义类名以隔离样式
+  isOpen: propsIsOpen = undefined, // 👈 新增：可选外部控制开启状态
+  showHint = true           // 👈 新增：控制是否显示点击提示箭头
 }) {
   const spreads = useMemo(() => {
     if (!Array.isArray(items)) return [];
@@ -34,7 +36,15 @@ export default function PhoalbumBook({
     return s;
   }, [items]);
 
-  const [isOpen, setIsOpen] = useState(!isInitialClosed);
+  const [isOpen, setIsOpen] = useState(propsIsOpen !== undefined ? propsIsOpen : !isInitialClosed);
+
+  // 👈 核心：同步外部传入的 isOpen 状态，解决导航逻辑中的状态漂移
+  useEffect(() => {
+    if (propsIsOpen !== undefined) {
+      setIsOpen(propsIsOpen);
+    }
+  }, [propsIsOpen]);
+
   const [index, setIndex] = useState(0);
   const [isTurning, setIsTurning] = useState(false);
   const [dir, setDir] = useState(null);
@@ -131,7 +141,7 @@ export default function PhoalbumBook({
         }}
       >
         <AnimatePresence>
-          {!isOpen && (
+          {showHint && !isOpen && (
             <motion.div
               className="click-hint-wrap"
               onClick={handleOpen}
@@ -155,7 +165,7 @@ export default function PhoalbumBook({
                   className="side-page-layer"
                   style={{
                     zIndex: -(i + 1),
-                    transform: `translateZ(${-i * 1.8}px) rotateY(calc(var(--book-progress, 0) * ${-3 - i * 1.6}deg)) translateX(${i * 0.7}px)`
+                    transform: `translateZ(${-i * 1.8}px) rotateY(calc(var(--book-progress, 0) * ${-3 - i * 1.2}deg)) translateX(${i * 0.5}px)`
                   }}
                 />
               ))}

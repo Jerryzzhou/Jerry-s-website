@@ -22,3 +22,11 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+._*
+
+# Media
+public/*.mp4
+public/*.mov
+public/design/*.webp
+node_modules/
+dist/

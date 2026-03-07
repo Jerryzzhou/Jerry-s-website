@@ -4,12 +4,14 @@ import { motion, useTransform, AnimatePresence } from "framer-motion";
 import FallingWords from "../components/FallingWords";
 import PhoalbumBook from "../components/PhoalbumBook";
 import InspirationWords from "../components/InspirationWords";
+import DoodlePhysics from "../components/DoodlePhysics";
 import BackgroundSlider from "../components/BackgroundSlider";
 import { getAssetPath } from "../utils/paths";
 
 export default function LandingPage() {
     const heroRef = useRef(null);
     const section4Ref = useRef(null);
+    const section3Ref = useRef(null); // Added for precise jumping
     const location = useLocation();
     const prevLocationRef = useRef(location.pathname);
     const lastSwitchRef = useRef(0);
@@ -25,9 +27,12 @@ export default function LandingPage() {
     const [showHint, setShowHint] = useState(true);
     const [isWordsFalling, setIsWordsFalling] = useState(false);
     const [isAboutPageActive, setIsAboutPageActive] = useState(false);
-    const isAboutPageActiveRef = useRef(false); // 👈 Use Ref to avoid stale closures in handleWheel
+    const [isVideosPageActive, setIsVideosPageActive] = useState(false);
+    const isAboutPageActiveRef = useRef(false);
+    const isVideosPageActiveRef = useRef(false);
     const [isWorksActive, setIsWorksActive] = useState(false);
     const [isWorksEntering, setIsWorksEntering] = useState(false);
+    const [isDirectNav, setIsDirectNav] = useState(false);
     const [isIdeaActive, setIsIdeaActive] = useState(false);
     const [showEditOverlay, setShowEditOverlay] = useState(false);
     const [newItemText, setNewItemText] = useState("");
@@ -81,8 +86,8 @@ export default function LandingPage() {
     const revealY = (1 - revealProgress) * 150;
 
     const fadeOut = 1 - Math.min(Math.max((p1 - 0.5) / 0.5, 0), 1);
-    const page1ExitY = -p2 * 1000;
-    const page2EnterY = (1 - p2) * 1000;
+    const page1ExitY = -p2 * (window.innerHeight || 1000);
+    const page2EnterY = (1 - p2) * (window.innerHeight || 1000);
 
     // --- LAYOUT ADJUSTMENT PARAMETERS ---
     const bottomTextOffsetY = 270;
@@ -127,7 +132,7 @@ export default function LandingPage() {
     const phase2TextMaxWidth = "580px";
     const phase2BookMaxW = "800px";
     const phase2BookScale = 1.08;
-    const phase2BookScaleMobile = 0.85;
+    const phase2BookScaleMobile = 0.95; // increased from 0.85 for better visibility on mobile
     const phase2BookOffsetX = 80;
     const phase2BookOffsetY = -5;
     const phase2BtnArrowOffsetX = 0;
@@ -137,18 +142,21 @@ export default function LandingPage() {
 
     useEffect(() => {
         const previousOverflow = document.body.style.overflow;
+
+        // --- GLOBAL OVERFLOW MANAGEMENT ---
         if (isWorksActive && !isWorksEntering) {
             document.body.style.overflow = "auto";
-            window.scrollTo(0, 0); // Ensure we start at top
         } else {
             document.body.style.overflow = "hidden";
+            if (window.scrollY > 0) window.scrollTo(0, 0);
         }
+
         const updateMax = () => {
             const nav = document.querySelector("nav");
             const navHeight = nav ? nav.getBoundingClientRect().height : 0;
             const viewportHeight = Math.max(window.innerHeight - navHeight, 0);
             const baseMax = Math.max(Math.round(viewportHeight * 0.28), 120);
-            setMaxVirtualScroll(baseMax * 2.2); // Extended for Phase 2 (Phoalbum)
+            setMaxVirtualScroll(baseMax * 2.2);
             setWhiteHeight(viewportHeight);
         };
         updateMax();
@@ -156,42 +164,32 @@ export default function LandingPage() {
 
         const section = heroRef.current;
         const handleWheel = (event) => {
-            // Check GLOBAL window location (HashRouter compatible) or Ref to block events
-            if (window.location.hash.includes("/about") || isAboutPageActiveRef.current) return;
+            if (window.location.hash.includes("/about") || isAboutPageActiveRef.current ||
+                window.location.hash.includes("/videos") || isVideosPageActiveRef.current) return;
 
             const now = Date.now();
             if (now < fromAboutCooldownRef.current) return;
             const page1Max = maxVirtualScroll / 2.2;
 
-            // Removed isWorksSnap logic block
-
             if (isVideosActive) {
-                // If we are in natural scroll mode, handle return to snap
                 if (isWorksActive) {
                     const scrollTop = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
-
-                    // STRICT RETURN LOGIC:
-                    // 1. Must not be entering (animation finished)
-                    // 2. Must be at the very top (scrollTop <= 5 tolerance)
-                    // 3. Must be a STRONG scroll up (deltaY < -100) to prevent accidental triggers (Increased force)
-                    if (!isWorksEntering && scrollTop <= 5 && event.deltaY < -100) {
-                        if (now - lastSwitchRef.current < SWITCH_COOLDOWN) return;
+                    if (!isWorksEntering && scrollTop <= 15 && event.deltaY < -40) {
                         event.preventDefault();
-                        setIsWorksEntering(true); // Lock for exit animation
+                        setIsWorksEntering(true);
                         setIsWorksActive(false);
-                        // Removed isWorksSnap set
+                        // Re-lock body and force scroll reset to prevent "stuck" layout shifts
                         document.body.style.overflow = "hidden";
+                        window.scrollTo(0, 0);
                         lastSwitchRef.current = now;
                     }
-                    return; // Let native scroll handle it otherwise
+                    return;
                 }
 
                 if (now - lastSwitchRef.current < SWITCH_COOLDOWN) return;
-                // Tier 4 -> Tier 3 (Videos -> Phoalbum)
-                if (event.deltaY < -30) { // Increased threshold for back-scroll to avoid double jump
+                if (event.deltaY < -20) {
                     event.preventDefault();
                     setIsVideosActive(false);
-                    document.body.style.overflow = "hidden";
                     lastSwitchRef.current = now;
                 }
                 // Tier 4 -> Tier 6 (Videos -> Works Active DIRECTLY)
@@ -199,7 +197,8 @@ export default function LandingPage() {
                     event.preventDefault();
                     setIsWorksEntering(true);
                     setIsWorksActive(true);
-                    // Overflow remains hidden until animation completes
+                    // Ensure overflow unlocks cleanly for native scrolling on Safari
+                    document.body.style.overflow = "auto";
                     lastSwitchRef.current = now;
                 }
                 return;
@@ -278,51 +277,189 @@ export default function LandingPage() {
     }, [maxVirtualScroll, isPhoalbumActive, isVideosActive, isWorksActive, location.pathname, isWorksEntering]);
 
     // Handle direct navigation to /videos
+    // --- LOCATION CHANGE HANDLER (Unified) ---
     useEffect(() => {
-        const fromAbout = prevLocationRef.current === "/about";
-        if (fromAbout && location.pathname === "/") {
+        const path = location.pathname;
+        const prevPath = prevLocationRef.current;
+        prevLocationRef.current = path; // Update for next run
+
+        const fromAbout = prevPath === "/about";
+        const fromVideos = prevPath === "/videos";
+
+        if (fromAbout && path === "/") {
             fromAboutCooldownRef.current = Date.now() + 1000;
         }
 
-        if (location.pathname === "/videos") {
+        if (path === "/videos") {
             setIsVideosActive(true);
             setIsPhoalbumActive(true);
-        } else if (location.pathname === "/ideas") {
+            lastSwitchRef.current = Date.now() + 500;
+        } else if (path === "/ideas") {
             setIsWorksActive(true);
             setIsVideosActive(true);
             setIsPhoalbumActive(true);
-            setIsWorksEntering(false); // 👈 立即标记为进入完成，解锁滚动
-        } else if (location.pathname === "/about") {
-            // Do nothing, preserve current state when about overlay is open
-        } else if (location.pathname === "/") {
-            // Always reset if we are back at the absolute root and NOT specifically coming back to a scrolled state
-            // (If coming from about, fromAbout is true, but we still want to reset if we are functionally at the start)
-            if (virtualScrollRef.current < 50 || !fromAbout) {
-                setIsVideosActive(false);
-                setIsPhoalbumActive(false);
-                setIsWorksActive(false);
+            setIsIdeaActive(true);
+
+            // Synchronize background position
+            setVirtualScroll(maxVirtualScroll + 20);
+            virtualScrollRef.current = maxVirtualScroll + 20;
+
+            // Scroll to Section 04
+            setTimeout(() => {
+                if (section4Ref.current) {
+                    section4Ref.current.scrollIntoView({ behavior: isDirectNav ? "instant" : "smooth" });
+                } else {
+                    window.scrollTo({ top: window.innerHeight, behavior: "instant" });
+                }
+                setIsWorksEntering(false);
+            }, 100);
+        } else if (path.startsWith("/portfolio")) {
+            setIsWorksActive(true);
+            setIsVideosActive(true);
+            setIsPhoalbumActive(true);
+            setIsIdeaActive(false);
+
+            // If coming from ideas or home, ensure we land at the top of Section 03
+            if (prevPath === "/ideas" || prevPath === "/") {
+                window.scrollTo({ top: 0, behavior: isDirectNav ? "instant" : "smooth" });
             }
-        }
-
-        prevLocationRef.current = location.pathname;
-    }, [location.pathname]);
-
-    // Listen for Home reset
-    useEffect(() => {
-        const handleReset = () => {
+        } else if (path === "/") {
+            // Home Reset: Definitive and Instant
+            setIsDirectNav(true);
             setVirtualScroll(0);
             virtualScrollRef.current = 0;
             setIsPhoalbumActive(false);
             setIsVideosActive(false);
-            setIsVideosActive(false);
-            // Removed isWorksSnap
             setIsWorksActive(false);
             setIsIdeaActive(false);
+            setIsWorksEntering(false);
+            window.scrollTo({ top: 0, left: 0, behavior: "instant" });
             document.body.style.overflow = "hidden";
+            setTimeout(() => setIsDirectNav(false), 100);
+        } else if (path !== "/about" && !path.startsWith("/videos")) {
+            // Force reset when leaving LandingPage context (Gallery, etc.)
+            setIsWorksActive(false);
+            setIsIdeaActive(false);
+            setIsWorksEntering(false);
+            window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+        }
+
+        return () => {
+            // Ensure body overflow is never stuck when transitions are interrupted
+            document.body.style.overflow = "auto";
+            setIsWorksEntering(false);
         };
+    }, [location.pathname]);
+    // Listen for Home reset and Navbar Actions
+    useEffect(() => {
+        const handleReset = () => {
+            setIsDirectNav(true); // Fast bypass
+            setVirtualScroll(0);
+            virtualScrollRef.current = 0;
+            setIsPhoalbumActive(false);
+            setIsVideosActive(false);
+            setIsWorksActive(false);
+            setIsIdeaActive(false);
+            setIsWorksEntering(false);
+            window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+            document.body.style.overflow = "hidden";
+            // Briefly kept for AnimatePresence exit
+            setTimeout(() => setIsDirectNav(false), 100);
+        };
+
+        const handleNavAction = (e) => {
+            const action = e.detail;
+            const now = Date.now();
+            const page1Max = maxVirtualScroll / 2.2;
+
+            // Guard: If we just reset, ignore very fast subsequent nav actions 
+            // to prevent "jump to works" when clicking About
+            if (now - lastSwitchRef.current < 200) return;
+
+            // Clear any lingering Works entering state before starting new navigation
+            setIsWorksEntering(false);
+
+            if (action === "NAV_PHOALBUM") {
+                window.scrollTo(0, 0);
+                setVirtualScroll(page1Max);
+                virtualScrollRef.current = page1Max;
+                setIsPhoalbumActive(true);
+                setIsVideosActive(false);
+                setIsWorksActive(false);
+                setIsWorksEntering(false);
+                setIsDirectNav(true);
+                setIsIdeaActive(false);
+                document.body.style.overflow = "hidden";
+                lastSwitchRef.current = now + 400;
+                setTimeout(() => setIsDirectNav(false), 500);
+            } else if (action === "NAV_VIDEOS") {
+                window.scrollTo(0, 0);
+                setVirtualScroll(page1Max + 20);
+                virtualScrollRef.current = page1Max + 20;
+                setIsPhoalbumActive(true);
+                setIsVideosActive(true);
+                setIsWorksActive(false);
+                setIsDirectNav(true);
+                setIsIdeaActive(false);
+                document.body.style.overflow = "hidden";
+                lastSwitchRef.current = now + 400;
+                setTimeout(() => setIsDirectNav(false), 800);
+            } else if (action === "NAV_WORKS") {
+                setIsPhoalbumActive(true);
+                setIsVideosActive(true);
+                setIsIdeaActive(false); // Explicitly clear Section 04 when going to 03
+                setIsWorksActive(true);
+                setIsDirectNav(true);
+                setIsWorksEntering(true);
+
+                // Synchronously max out virtual scroll to anchor the background tiers
+                setVirtualScroll(maxVirtualScroll + 20);
+                virtualScrollRef.current = maxVirtualScroll + 20;
+
+                setTimeout(() => {
+                    window.scrollTo(0, 0);
+                    setIsWorksEntering(false);
+                    setIsDirectNav(false);
+                    document.body.style.overflow = "auto";
+                    lastSwitchRef.current = Date.now() + 200;
+                }, 50);
+            } else if (action === "NAV_IDEA") {
+                setIsPhoalbumActive(true);
+                setIsVideosActive(true);
+                setIsWorksActive(true);
+                setIsIdeaActive(true);
+                setIsWorksEntering(true);
+                setIsDirectNav(true);
+
+                setVirtualScroll(maxVirtualScroll + 20);
+                virtualScrollRef.current = maxVirtualScroll + 20;
+
+                setTimeout(() => {
+                    const offset = window.innerHeight;
+                    window.scrollTo(0, offset);
+                    setIsWorksEntering(false);
+                    setIsDirectNav(false);
+                    document.body.style.overflow = "auto";
+                    lastSwitchRef.current = Date.now() + 200;
+                }, 50);
+            }
+
+            // Fallback for any fast actions that didn't set a future lockout
+            if (lastSwitchRef.current <= now) {
+                lastSwitchRef.current = now + 200;
+            }
+        };
+
         window.addEventListener("resetHome", handleReset);
-        return () => window.removeEventListener("resetHome", handleReset);
-    }, []);
+        window.addEventListener("navAction", handleNavAction);
+        return () => {
+            window.removeEventListener("resetHome", handleReset);
+            window.removeEventListener("navAction", handleNavAction);
+        };
+    }, [maxVirtualScroll]);
+
+
+
 
     // Notify Navbar of active section
     useEffect(() => {
@@ -364,30 +501,36 @@ export default function LandingPage() {
         return () => observer.disconnect();
     }, [isWorksActive]);
 
-    // Handle scroll to Section 04 when /ideas is matched
-    useEffect(() => {
-        if (location.pathname === "/ideas") {
-            // No delay needed now as animation is zero-duration 
-            if (section4Ref.current) {
-                section4Ref.current.scrollIntoView({ behavior: "auto" });
-            }
-        }
-    }, [location.pathname, isWorksActive]);
+
 
     // Listen for About page state changes & Trigger Cooldown
     useEffect(() => {
         const handleAboutPageChange = (e) => {
             const isActive = e.detail.isActive;
             setIsAboutPageActive(isActive);
-            isAboutPageActiveRef.current = isActive; // 👈 Sync Ref
+            isAboutPageActiveRef.current = isActive;
 
             if (!isActive) {
-                // About page just closed, set cooldown to prevent phantom scroll
                 fromAboutCooldownRef.current = Date.now() + 1000;
             }
         };
+
+        const handleVideosPageChange = (e) => {
+            const isActive = e.detail.isActive;
+            setIsVideosPageActive(isActive);
+            isVideosPageActiveRef.current = isActive;
+
+            if (!isActive) {
+                fromAboutCooldownRef.current = Date.now() + 1000;
+            }
+        };
+
         window.addEventListener("aboutPageStateChange", handleAboutPageChange);
-        return () => window.removeEventListener("aboutPageStateChange", handleAboutPageChange);
+        window.addEventListener("videosPageStateChange", handleVideosPageChange);
+        return () => {
+            window.removeEventListener("aboutPageStateChange", handleAboutPageChange);
+            window.removeEventListener("videosPageStateChange", handleVideosPageChange);
+        };
     }, []);
 
     // Phoalbum Data for Preview
@@ -563,8 +706,8 @@ export default function LandingPage() {
                 }}
                 className="fixed top-[-10px] left-8 md:top-[-20px] md:left-12 z-[10010] hint-bounce-animation cursor-grab active:cursor-grabbing"
                 style={{
-                    opacity: (showHint && !isPhoalbumActive && !isAboutPageActive && !isVideosActive) ? revealProgress : 0,
-                    pointerEvents: (showHint && !isPhoalbumActive && !isAboutPageActive && !isVideosActive && revealProgress > 0.1) ? "auto" : "none",
+                    opacity: (showHint && !isPhoalbumActive && !isAboutPageActive && !isVideosActive && !isWorksActive) ? revealProgress : 0,
+                    pointerEvents: (showHint && !isPhoalbumActive && !isAboutPageActive && !isVideosActive && !isWorksActive && revealProgress > 0.1) ? "auto" : "none",
                     transition: 'opacity 0.5s ease-in-out'
                 }}
             >
@@ -583,10 +726,10 @@ export default function LandingPage() {
                 <motion.div
                     className="absolute inset-0 w-full h-full"
                     animate={{
-                        y: isPhoalbumActive ? -1000 : 0,
-                        opacity: isPhoalbumActive ? 0 : 1
+                        y: (isPhoalbumActive || isVideosActive || isWorksActive) ? "-100vh" : 0,
+                        opacity: (isPhoalbumActive || isVideosActive || isWorksActive) ? 0 : 1
                     }}
-                    transition={{ duration: 0.5, ease: [0.76, 0, 0.24, 1] }}
+                    transition={{ duration: isDirectNav ? 0 : 0.5, ease: [0.76, 0, 0.24, 1] }}
                 >
                     {/* Original Hero Content - Drifting Unchanged */}
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
@@ -697,10 +840,9 @@ export default function LandingPage() {
                         }}
                     />
 
-                    {/* Falling Words Physics Component */}
                     <FallingWords
-                        trigger={isWordsFalling && !isPhoalbumActive && !isAboutPageActive && !isVideosActive}
-                        visible={!isAboutPageActive && !isVideosActive}
+                        trigger={isWordsFalling && !isPhoalbumActive && !isAboutPageActive && !isVideosActive && !isWorksActive}
+                        visible={!isAboutPageActive && !isVideosActive && !isWorksActive}
                         floorY={lineTop}
                         leftSpawnX={window.innerWidth * 0.2}
                         rightSpawnX={window.innerWidth * 0.8}
@@ -719,7 +861,7 @@ export default function LandingPage() {
                             y: p1 > 0.4 ? (revealOffsetY + bottomTextOffsetY) : (revealOffsetY + bottomTextOffsetY + 100),
                             opacity: (p1 > 0.4 && !isPhoalbumActive) ? 1 : 0
                         }}
-                        transition={{ duration: 0.8, ease: [0.76, 0, 0.24, 1] }}
+                        transition={{ duration: isDirectNav ? 0 : 0.8, ease: [0.76, 0, 0.24, 1] }}
                     >
                         <div
                             className="mt-0 w-full text-left pointer-events-auto"
@@ -794,18 +936,18 @@ export default function LandingPage() {
                     </div>
                 </motion.div>
 
-                {/* --- PHASE 2 CONTAINER (Phoalbum) --- */}
                 <motion.div
                     className="absolute inset-0 w-full h-full flex items-center justify-center pointer-events-none"
-                    initial={{ y: 1000, opacity: 0 }}
+                    initial={{ y: "100vh", opacity: 0 }}
                     animate={{
-                        y: isPhoalbumActive ? 0 : (isVideosActive || isWorksActive ? -1000 : 1000),
+                        y: isPhoalbumActive ? 0 : (isVideosActive || isWorksActive ? "-100vh" : "100vh"),
                         opacity: isPhoalbumActive ? 1 : 0
                     }}
-                    transition={{ duration: 0.5, ease: [0.76, 0, 0.24, 1] }} // 调整此行加快过渡速度
+                    transition={{ duration: isDirectNav ? 0 : 0.5, ease: [0.76, 0, 0.24, 1] }}
                 >
+                    <DoodlePhysics isActive={isPhoalbumActive} />
                     <div
-                        className="w-full flex flex-col md:flex-row items-center justify-between pointer-events-auto"
+                        className="relative z-10 w-full flex flex-col md:flex-row items-center justify-between pointer-events-auto"
                         style={{
                             maxWidth: phase2ContentMaxWidth,
                             padding: phase2ContentPadding,
@@ -813,67 +955,74 @@ export default function LandingPage() {
                         }}
                     >
                         {/* Left Side: Text & Button */}
-                        <div className="flex-1 text-left" style={{ maxWidth: phase2TextMaxWidth }}>
-                            <motion.h2
-                                className="font-['HYPixel'] text-[#111] mb-10 tracking-tight"
-                                style={{ fontSize: "36px" }}
-                                animate={{ opacity: isPhoalbumActive ? 1 : 0, y: isPhoalbumActive ? 0 : 10 }}
-                                transition={{ delay: 0.5, duration: 0.25, ease: [0.76, 0, 0.24, 1] }}
-                            >
-                                // 01 Phoalbum
-                            </motion.h2>
+                        <div className="flex-1 text-left relative" style={{ maxWidth: phase2TextMaxWidth }}>
+                            {/* --- Unified Frosted Backdrop Block (Absolute to not affect layout) --- */}
+                            <div
+                                className="absolute left-[-20px] right-[-1000px] top-[-10px] bottom-[-20px] backdrop-blur-sm bg-[#F2F2F2]/40 rounded-xl border border-white/10 z-0 pointer-events-none"
+                            />
 
-                            <motion.div
-                                className="font-['DotPixel'] text-[#545454]"
-                                style={{ fontSize: "16px", lineHeight: "1.6" }}
-                                animate={{ opacity: isPhoalbumActive ? 1 : 0, y: isPhoalbumActive ? 0 : 10 }}
-                                transition={{ delay: 0.6, duration: 0.25, ease: [0.76, 0, 0.24, 1] }}
-                            >
-                                <p>
-                                    This is a term I coined myself, combining 'Photo' and 'album'.
-                                    The original intention behind creating this photobook stems from a point in time when I began to lose my sense of joy.
-                                    I found myself becoming inexplicably serious in daily life, and it seemed that as I grew older,
-                                    my ability to perceive life was gradually diminishing...
-                                    Photography, however, became a way for me to rediscover joy and reconnect with life
-                                    (alongside painting, of course). Thus, I urgently wished for my observations,
-                                    my joys, and my small insights to manifest tangibly before me,
-                                    constantly reminding me: Be Happy, Do Not Worry~.
-                                </p>
-                            </motion.div>
+                            <div className="relative z-10">
+                                <motion.h2
+                                    className="font-['HYPixel'] text-[#111] mb-10 tracking-tight"
+                                    style={{ fontSize: "36px" }}
+                                    animate={{ opacity: isPhoalbumActive ? 1 : 0, y: isPhoalbumActive ? 0 : 10 }}
+                                    transition={{ delay: 0.5, duration: 0.25, ease: [0.76, 0, 0.24, 1] }}
+                                >
+                                    // 01 Phoalbum
+                                </motion.h2>
 
-                            <motion.div
-                                className="mt-16"
-                                animate={{ opacity: isPhoalbumActive ? 1 : 0, y: isPhoalbumActive ? 0 : 10 }}
-                                transition={{ delay: 0.7, duration: 0.25, ease: [0.76, 0, 0.24, 1] }}
-                            >
-                                <Link to="/gallery" className="group block w-full md:w-[420px]">
-                                    <motion.div
-                                        whileHover="hover"
-                                        className="relative border border-[#111] h-[124px] bg-transparent group-hover:bg-[#111] transition-colors duration-300 p-6 flex flex-col justify-between"
-                                    >
+                                <motion.div
+                                    className="font-['DotPixel'] text-[#545454]"
+                                    style={{ fontSize: "16px", lineHeight: "1.6" }}
+                                    animate={{ opacity: isPhoalbumActive ? 1 : 0, y: isPhoalbumActive ? 0 : 10 }}
+                                    transition={{ delay: 0.6, duration: 0.25, ease: [0.76, 0, 0.24, 1] }}
+                                >
+                                    <p>
+                                        This is a term I coined myself, combining 'Photo' and 'album'.
+                                        The original intention behind creating this photobook stems from a point in time when I began to lose my sense of joy.
+                                        I found myself becoming inexplicably serious in daily life, and it seemed that as I grew older,
+                                        my ability to perceive life was gradually diminishing...
+                                        Photography, however, became a way for me to rediscover joy and reconnect with life
+                                        (alongside painting, of course). Thus, I urgently wished for my observations,
+                                        my joys, and my small insights to manifest tangibly before me,
+                                        constantly reminding me: Be Happy, Do Not Worry~.
+                                    </p>
+                                </motion.div>
+
+                                <motion.div
+                                    className="mt-16"
+                                    animate={{ opacity: isPhoalbumActive ? 1 : 0, y: isPhoalbumActive ? 0 : 10 }}
+                                    transition={{ delay: 0.7, duration: 0.25, ease: [0.76, 0, 0.24, 1] }}
+                                >
+                                    <Link to="/gallery" className="group block w-full md:w-[420px]">
                                         <motion.div
-                                            className="flex justify-end pointer-events-none"
-                                            style={{ transform: `translate(${phase2BtnArrowOffsetX}px, ${phase2BtnArrowOffsetY}px)` }}
-                                            variants={{
-                                                hover: { x: phase2BtnArrowOffsetX + 8 }
-                                            }}
-                                            transition={{ duration: 0.3, ease: "easeOut" }}
+                                            whileHover="hover"
+                                            className="relative border border-[#111] h-[124px] bg-transparent group-hover:bg-[#111] transition-colors duration-300 p-6 flex flex-col justify-between"
                                         >
-                                            <span className="font-['DotPixel'] text-[#111] group-hover:text-white text-[20px] transition-colors duration-300">
-                                                &gt;&gt;&gt;
-                                            </span>
+                                            <motion.div
+                                                className="flex justify-end pointer-events-none"
+                                                style={{ transform: `translate(${phase2BtnArrowOffsetX}px, ${phase2BtnArrowOffsetY}px)` }}
+                                                variants={{
+                                                    hover: { x: phase2BtnArrowOffsetX + 8 }
+                                                }}
+                                                transition={{ duration: 0.3, ease: "easeOut" }}
+                                            >
+                                                <span className="font-['DotPixel'] text-[#111] group-hover:text-white text-[20px] transition-colors duration-300">
+                                                    &gt;&gt;&gt;
+                                                </span>
+                                            </motion.div>
+                                            <div
+                                                className="flex justify-start"
+                                                style={{ transform: `translate(${phase2BtnTextOffsetX}px, ${phase2BtnTextOffsetY}px)` }}
+                                            >
+                                                <span className="font-['DotPixel'] text-[20px] tracking-widest uppercase text-[#111] group-hover:text-white transition-colors duration-300">
+                                                    ENTER GALLERY
+                                                </span>
+                                            </div>
                                         </motion.div>
-                                        <div
-                                            className="flex justify-start"
-                                            style={{ transform: `translate(${phase2BtnTextOffsetX}px, ${phase2BtnTextOffsetY}px)` }}
-                                        >
-                                            <span className="font-['DotPixel'] text-[20px] tracking-widest uppercase text-[#111] group-hover:text-white transition-colors duration-300">
-                                                ENTER GALLERY
-                                            </span>
-                                        </div>
-                                    </motion.div>
-                                </Link>
-                            </motion.div>
+                                    </Link>
+                                </motion.div>
+                            </div>
                         </div>
 
                         {/* Right Side: Book Preview (Canvas Area) */}
@@ -882,12 +1031,19 @@ export default function LandingPage() {
                             style={{
                                 maxWidth: phase2BookMaxW
                             }}
+                            initial={{
+                                opacity: 0,
+                                x: phase2BookOffsetX,
+                                y: phase2BookOffsetY,
+                                scale: window.innerWidth > 768 ? phase2BookScale : phase2BookScaleMobile,
+                                rotate: 0
+                            }}
                             animate={{
                                 opacity: isPhoalbumActive ? 1 : 0,
-                                x: phase2BookOffsetX, // Constant offset
-                                y: phase2BookOffsetY, // Constant offset
-                                scale: window.innerWidth > 768 ? phase2BookScale : phase2BookScaleMobile, // Constant scale
-                                rotate: 0 // No rotation
+                                x: phase2BookOffsetX,
+                                y: phase2BookOffsetY,
+                                scale: window.innerWidth > 768 ? phase2BookScale : phase2BookScaleMobile,
+                                rotate: 0
                             }}
                             transition={{ delay: 0.8, duration: 0.25, ease: [0.76, 0, 0.24, 1] }}
                         >
@@ -907,9 +1063,9 @@ export default function LandingPage() {
                 {/* --- PHASE 3 CONTAINER (Videos) --- */}
                 <motion.div
                     className="absolute inset-0 w-full h-full flex items-center justify-center pointer-events-none"
-                    initial={{ y: 1000 }}
-                    animate={{ y: isVideosActive ? (isWorksActive ? "-100vh" : 0) : 1000 }}
-                    transition={{ duration: 0.8, ease: [0.76, 0, 0.24, 1] }}
+                    initial={{ y: "100vh" }}
+                    animate={{ y: isVideosActive ? (isWorksActive ? "-100vh" : "0vh") : "100vh" }}
+                    transition={{ duration: isDirectNav ? 0 : 0.8, ease: [0.76, 0, 0.24, 1] }}
                     style={{ backgroundColor: "#222222", zIndex: 100 }}
                 >
                     <div
@@ -920,19 +1076,34 @@ export default function LandingPage() {
                             marginTop: "160px" // Compensate for manual upward offsets of children
                         }}
                     >
-                        <motion.h2 className="font-['HYPixel'] mb-8 text-white" style={{ fontSize: "36px" }} animate={{ opacity: isVideosActive ? 1 : 0, y: isVideosActive ? 0 : 10 }} transition={{ delay: 0.5 }}>// 02 Videos</motion.h2>
-                        <motion.div className="font-['DotPixel'] text-white/80 mb-12 max-w-8xl" style={{ fontSize: "16px", lineHeight: "1.6" }} animate={{ opacity: isVideosActive ? 1 : 0, y: isVideosActive ? 0 : 10 }} transition={{ delay: 0.6 }}>
+                        <motion.h2
+                            className="font-['HYPixel'] mb-8 text-white"
+                            style={{ fontSize: "36px" }}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: isVideosActive ? 1 : 0, y: isVideosActive ? 0 : 10 }}
+                            transition={{ delay: 0.5 }}
+                        >
+                            // 02 Videos
+                        </motion.h2>
+                        <motion.div
+                            className="font-['DotPixel'] text-white/80 mb-12 max-w-8xl"
+                            style={{ fontSize: "16px", lineHeight: "1.6" }}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: isVideosActive ? 1 : 0, y: isVideosActive ? 0 : 10 }}
+                            transition={{ delay: 0.6 }}
+                        >
                             <p>These videos represent my attempt to leave something behind in this world. The content largely revolves around design education and design history, starting from a minute design detail or visual phenomenon to trace its origins and how it shapes our contemporary perceptions and usage. Beyond relatively systematic research, I also engage in lighter, more offbeat experiments—drawn from daily life, travels, or moments that make me pause for a second look. Regardless of form, they all point to the same thing: preserving the thoughts and curiosities unfolding in the present.</p>
                         </motion.div>
                         <div className="flex flex-col md:flex-row gap-12 items-start">
                             {/* Left Side: Smaller Image */}
                             <motion.div
                                 className="w-full md:w-[35%]"
+                                initial={{ opacity: 0, y: 10 }}
                                 animate={{
                                     opacity: isVideosActive ? 1 : 0,
                                     scale: window.innerWidth >= 768 ? 0.8 : 1,
                                     x: window.innerWidth >= 768 ? 676 : 0,
-                                    y: window.innerWidth >= 768 ? -40 : 0
+                                    y: window.innerWidth >= 768 ? (isVideosActive ? -40 : -30) : 0
                                 }}
                                 transition={{ delay: 0.7, duration: 0.25, ease: [0.76, 0, 0.24, 1] }}
                             >
@@ -943,10 +1114,11 @@ export default function LandingPage() {
                             <div className="w-full md:w-[55%] flex flex-col gap-10">
                                 <motion.div
                                     className="aspect-video bg-black/40 border border-white/20 group overflow-hidden relative"
+                                    initial={{ opacity: 0, y: 10 }}
                                     animate={{
                                         opacity: isVideosActive ? 1 : 0,
                                         x: window.innerWidth >= 768 ? -484 : 0,
-                                        y: window.innerWidth >= 768 ? -10 : 0
+                                        y: window.innerWidth >= 768 ? (isVideosActive ? -10 : 0) : 0
                                     }}
                                     transition={{ delay: 0.8, duration: 0.25, ease: [0.76, 0, 0.24, 1] }}
                                 >
@@ -969,12 +1141,17 @@ export default function LandingPage() {
 
                                 <motion.div
                                     className="mt-16 self-end"
+                                    initial={{ opacity: 0, y: 10 }}
                                     animate={{
                                         opacity: isVideosActive ? 1 : 0,
                                         x: window.innerWidth >= 768 ? (isVideosActive ? 86 : 96) : 0,
                                         y: window.innerWidth >= 768 ? (isVideosActive ? -240 : -230) : 0
                                     }}
-                                    transition={{ delay: 0.9, duration: 0.25, ease: [0.76, 0, 0.24, 1] }}
+                                    transition={{
+                                        delay: 0.9,
+                                        duration: 0.25,
+                                        ease: [0.76, 0, 0.24, 1]
+                                    }}
                                 >
                                     <Link to="/videos" className="group block w-full md:w-[535px]">
                                         <div className="relative border border-white h-[124px] bg-transparent group-hover:bg-white transition-colors duration-300 p-6 flex flex-col justify-between">
@@ -1009,13 +1186,11 @@ export default function LandingPage() {
                         animate={{ y: 0 }}
                         exit={{ y: "100vh" }}
                         transition={{
-                            duration: location.pathname === "/ideas" ? 0 : 0.8, // 👈 如果是跳转，动画时长设为 0
+                            duration: isDirectNav ? 0 : 0.8,
                             ease: [0.76, 0, 0.24, 1]
                         }}
                         onAnimationComplete={() => {
-                            if (location.pathname !== "/ideas") {
-                                setIsWorksEntering(false);
-                            }
+                            setIsWorksEntering(false);
                         }}
                         style={{ marginTop: "-100vh" }}
                     >
@@ -1039,7 +1214,7 @@ export default function LandingPage() {
                             <div className="relative z-10">
 
                                 {/* Section 03 - My Works */}
-                                <section className="relative min-h-screen z-10 flex flex-col justify-center">
+                                <section id="works-section-mount" ref={section3Ref} className="relative min-h-screen z-10 flex flex-col justify-center">
                                     <div
                                         className="w-full mx-auto"
                                         style={{
@@ -1089,7 +1264,7 @@ export default function LandingPage() {
 
 
                                 {/* Section 04 - Some Ideas */}
-                                <section ref={section4Ref} className="relative min-h-screen z-10 flex flex-col justify-center">
+                                <section id="idea-section-mount" ref={section4Ref} className="relative min-h-screen z-10 flex flex-col justify-center pb-24">
                                     <div className="w-full mx-auto" style={{ maxWidth: phase2ContentMaxWidth, padding: phase2ContentPadding, paddingBottom: 0 }}>
                                         <h2 className="font-['HYPixel'] text-[#111] mb-10 tracking-tight" style={{ fontSize: "36px" }}>
                                     // 04 Some Ideas

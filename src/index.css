@@ -46,6 +46,7 @@
 html,
 body {
   height: 100%;
+  height: -webkit-fill-available;
   overflow-x: hidden;
   scroll-behavior: smooth;
   font-family: 'DotPixel', 'Courier New', monospace;

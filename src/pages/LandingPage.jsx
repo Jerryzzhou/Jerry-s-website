@@ -18,11 +18,39 @@ export default function LandingPage() {
     const fromAboutCooldownRef = useRef(0);
     const SWITCH_COOLDOWN = 800;
 
-    const [virtualScroll, setVirtualScroll] = useState(0);
-    const virtualScrollRef = useRef(0); // Track latest value for handles without stale closures
-    const [maxVirtualScroll, setMaxVirtualScroll] = useState(220);
-    const [isPhoalbumActive, setIsPhoalbumActive] = useState(false);
-    const [isVideosActive, setIsVideosActive] = useState(false);
+    // Read initial path once to seed all states — prevents flash-to-home on refresh
+    const _initHash = window.location.hash.toLowerCase();
+    const _isWorksPath = _initHash.includes("/portfolio") || _initHash.includes("/ideas");
+    const _isIdeasPath = _initHash.includes("/ideas");
+    const _isLandingSection = _isWorksPath || _initHash.includes("phoalbum") || _initHash.includes("videos");
+
+    const [virtualScroll, setVirtualScroll] = useState(() => {
+        // Precise initial offset calculation to prevent flash
+        const vh = window.innerHeight;
+        const navH = 80; // Estimated nav height
+        const vH = Math.max(vh - navH, 0);
+        const bM = Math.max(Math.round(vH * 0.28), 120);
+        const cM = bM * 2.2;
+        const p1M = cM / 2.2;
+
+        if (_isWorksPath) return cM + 20;
+        if (_initHash.includes("videos-section")) return p1M + 20;
+        if (_initHash.includes("phoalbum-section")) return p1M;
+        if (_initHash.includes("videos")) return p1M + 20;
+        if (_initHash.includes("phoalbum")) return p1M;
+        return 0;
+    });
+    // Track latest value for handles without stale closures. Initialize exactly as virtualScroll.
+    const virtualScrollRef = useRef(virtualScroll);
+    const [maxVirtualScroll, setMaxVirtualScroll] = useState(() => {
+        const vh = window.innerHeight;
+        const navH = 80;
+        const vH = Math.max(vh - navH, 0);
+        const bM = Math.max(Math.round(vH * 0.28), 120);
+        return bM * 2.2;
+    });
+    const [isPhoalbumActive, setIsPhoalbumActive] = useState(_isLandingSection);
+    const [isVideosActive, setIsVideosActive] = useState(_isLandingSection && (_initHash.includes("videos") || _isWorksPath));
     const [whiteHeight, setWhiteHeight] = useState(window.innerHeight);
     const [showHint, setShowHint] = useState(true);
     const [isWordsFalling, setIsWordsFalling] = useState(false);
@@ -30,10 +58,12 @@ export default function LandingPage() {
     const [isVideosPageActive, setIsVideosPageActive] = useState(false);
     const isAboutPageActiveRef = useRef(false);
     const isVideosPageActiveRef = useRef(false);
-    const [isWorksActive, setIsWorksActive] = useState(false);
+    const [isWorksActive, setIsWorksActive] = useState(_isWorksPath);
+    const isWorksActiveRef = useRef(_isWorksPath); // Always-fresh ref for event handler closures
     const [isWorksEntering, setIsWorksEntering] = useState(false);
-    const [isDirectNav, setIsDirectNav] = useState(false);
-    const [isIdeaActive, setIsIdeaActive] = useState(false);
+    const [isDirectNav, setIsDirectNav] = useState(_isLandingSection);
+    const isDirectNavRef = useRef(_isLandingSection); // Avoids stale closure in location effect
+    const [isIdeaActive, setIsIdeaActive] = useState(_isIdeasPath);
     const [showEditOverlay, setShowEditOverlay] = useState(false);
     const [newItemText, setNewItemText] = useState("");
     const [newItemImage, setNewItemImage] = useState("");
@@ -140,6 +170,10 @@ export default function LandingPage() {
     const phase2BtnTextOffsetX = 0;
     const phase2BtnTextOffsetY = 10;
 
+    // Keep refs in sync so event handler closures always read the latest value
+    useEffect(() => { isWorksActiveRef.current = isWorksActive; }, [isWorksActive]);
+    useEffect(() => { isDirectNavRef.current = isDirectNav; }, [isDirectNav]);
+
     useEffect(() => {
         const previousOverflow = document.body.style.overflow;
 
@@ -156,16 +190,21 @@ export default function LandingPage() {
             const navHeight = nav ? nav.getBoundingClientRect().height : 0;
             const viewportHeight = Math.max(window.innerHeight - navHeight, 0);
             const baseMax = Math.max(Math.round(viewportHeight * 0.28), 120);
-            setMaxVirtualScroll(baseMax * 2.2);
+            const currentMax = baseMax * 2.2;
+            const page1Max = currentMax / 2.2;
+            setMaxVirtualScroll(currentMax);
             setWhiteHeight(viewportHeight);
+
+            // Initial seeding is now exclusively handled by useState at mount.
         };
         updateMax();
         window.addEventListener("resize", updateMax);
 
         const section = heroRef.current;
         const handleWheel = (event) => {
-            if (window.location.hash.includes("/about") || isAboutPageActiveRef.current ||
-                window.location.hash.includes("/videos") || isVideosPageActiveRef.current) return;
+            const currentHash = window.location.hash;
+            if (currentHash === "#/about" || isAboutPageActiveRef.current ||
+                currentHash === "#/videos" || isVideosPageActiveRef.current) return;
 
             const now = Date.now();
             if (now < fromAboutCooldownRef.current) return;
@@ -197,6 +236,11 @@ export default function LandingPage() {
                     event.preventDefault();
                     setIsWorksEntering(true);
                     setIsWorksActive(true);
+
+                    const actualMax = Math.max(Math.round(Math.max(window.innerHeight - 80, 0) * 0.28), 120) * 2.2;
+                    setVirtualScroll(actualMax + 20);
+                    virtualScrollRef.current = actualMax + 20;
+
                     // Ensure overflow unlocks cleanly for native scrolling on Safari
                     document.body.style.overflow = "auto";
                     lastSwitchRef.current = now;
@@ -279,6 +323,12 @@ export default function LandingPage() {
     // Handle direct navigation to /videos
     // --- LOCATION CHANGE HANDLER (Unified) ---
     useEffect(() => {
+        // Force manual scroll restoration to prevent browser from "remembering" 
+        // the deep scroll position when navigating LandingPage sub-routes
+        if ('scrollRestoration' in window.history) {
+            window.history.scrollRestoration = 'manual';
+        }
+
         const path = location.pathname;
         const prevPath = prevLocationRef.current;
         prevLocationRef.current = path; // Update for next run
@@ -294,6 +344,24 @@ export default function LandingPage() {
             setIsVideosActive(true);
             setIsPhoalbumActive(true);
             lastSwitchRef.current = Date.now() + 500;
+        } else if (path === "/videos-section") {
+            setIsVideosActive(true);
+            setIsPhoalbumActive(true);
+            setIsWorksActive(false);
+            setIsIdeaActive(false);
+            const actualMax = Math.max(Math.round(Math.max(window.innerHeight - 80, 0) * 0.28), 120) * 2.2;
+            const p1Max = actualMax / 2.2;
+            setVirtualScroll(p1Max + 20);
+            virtualScrollRef.current = p1Max + 20;
+        } else if (path === "/phoalbum-section") {
+            setIsPhoalbumActive(true);
+            setIsVideosActive(false);
+            setIsWorksActive(false);
+            setIsIdeaActive(false);
+            const actualMax = Math.max(Math.round(Math.max(window.innerHeight - 80, 0) * 0.28), 120) * 2.2;
+            const p1Max = actualMax / 2.2;
+            setVirtualScroll(p1Max);
+            virtualScrollRef.current = p1Max;
         } else if (path === "/ideas") {
             setIsWorksActive(true);
             setIsVideosActive(true);
@@ -307,7 +375,7 @@ export default function LandingPage() {
             // Scroll to Section 04
             setTimeout(() => {
                 if (section4Ref.current) {
-                    section4Ref.current.scrollIntoView({ behavior: isDirectNav ? "instant" : "smooth" });
+                    section4Ref.current.scrollIntoView({ behavior: isDirectNavRef.current ? "instant" : "smooth" });
                 } else {
                     window.scrollTo({ top: window.innerHeight, behavior: "instant" });
                 }
@@ -321,11 +389,34 @@ export default function LandingPage() {
 
             // If coming from ideas or home, ensure we land at the top of Section 03
             if (prevPath === "/ideas" || prevPath === "/") {
-                window.scrollTo({ top: 0, behavior: isDirectNav ? "instant" : "smooth" });
+                window.scrollTo({ top: 0, behavior: isDirectNavRef.current ? "instant" : "smooth" });
             }
         } else if (path === "/") {
+            // Check if we are actually staying on a sub-section via hash
+            const currentHash = window.location.hash.toLowerCase();
+            const isSubSection = currentHash.includes("phoalbum") || currentHash.includes("videos") || path.includes("phoalbum-section") || path.includes("videos-section");
+
+            if (isSubSection) {
+                // If we are moving to Phoalbum/Videos within the root path, 
+                // ensure we clear the works container state immediately.
+                setIsWorksActive(false);
+                setIsIdeaActive(false);
+                setIsWorksEntering(false);
+                return;
+            }
+
             // Home Reset: Definitive and Instant
+            // Force clear detail-page locks to prevent interaction deadlock
+            isAboutPageActiveRef.current = false;
+            isVideosPageActiveRef.current = false;
+            setIsAboutPageActive(false);
+            setIsVideosPageActive(false);
+
             setIsDirectNav(true);
+            document.body.style.overflow = "auto";
+            window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+            document.documentElement.scrollTop = 0;
+
             setVirtualScroll(0);
             virtualScrollRef.current = 0;
             setIsPhoalbumActive(false);
@@ -333,9 +424,15 @@ export default function LandingPage() {
             setIsWorksActive(false);
             setIsIdeaActive(false);
             setIsWorksEntering(false);
-            window.scrollTo({ top: 0, left: 0, behavior: "instant" });
-            document.body.style.overflow = "hidden";
-            setTimeout(() => setIsDirectNav(false), 100);
+
+            setTimeout(() => {
+                window.scrollTo(0, 0);
+                document.documentElement.scrollTop = 0;
+                // Re-lock for hero section initial state
+                document.body.style.overflow = "hidden";
+            }, 20);
+
+            setTimeout(() => setIsDirectNav(false), 800);
         } else if (path !== "/about" && !path.startsWith("/videos")) {
             // Force reset when leaving LandingPage context (Gallery, etc.)
             setIsWorksActive(false);
@@ -353,7 +450,11 @@ export default function LandingPage() {
     // Listen for Home reset and Navbar Actions
     useEffect(() => {
         const handleReset = () => {
-            setIsDirectNav(true); // Fast bypass
+            setIsDirectNav(true);
+            document.body.style.overflow = "auto";
+            window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+            document.documentElement.scrollTop = 0;
+
             setVirtualScroll(0);
             virtualScrollRef.current = 0;
             setIsPhoalbumActive(false);
@@ -361,10 +462,14 @@ export default function LandingPage() {
             setIsWorksActive(false);
             setIsIdeaActive(false);
             setIsWorksEntering(false);
-            window.scrollTo({ top: 0, left: 0, behavior: "instant" });
-            document.body.style.overflow = "hidden";
-            // Briefly kept for AnimatePresence exit
-            setTimeout(() => setIsDirectNav(false), 100);
+
+            setTimeout(() => {
+                window.scrollTo(0, 0);
+                document.documentElement.scrollTop = 0;
+                document.body.style.overflow = "hidden";
+            }, 50);
+
+            setTimeout(() => setIsDirectNav(false), 2000);
         };
 
         const handleNavAction = (e) => {
@@ -380,68 +485,113 @@ export default function LandingPage() {
             setIsWorksEntering(false);
 
             if (action === "NAV_PHOALBUM") {
-                window.scrollTo(0, 0);
+                setIsDirectNav(true);
+                document.body.style.overflow = "auto";
+                window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+                document.documentElement.scrollTop = 0;
+
                 setVirtualScroll(page1Max);
                 virtualScrollRef.current = page1Max;
                 setIsPhoalbumActive(true);
                 setIsVideosActive(false);
                 setIsWorksActive(false);
                 setIsWorksEntering(false);
-                setIsDirectNav(true);
                 setIsIdeaActive(false);
-                document.body.style.overflow = "hidden";
-                lastSwitchRef.current = now + 400;
-                setTimeout(() => setIsDirectNav(false), 500);
+
+                // Final cleanup after state propagation
+                setTimeout(() => {
+                    window.scrollTo(0, 0);
+                    document.documentElement.scrollTop = 0;
+                    document.body.style.overflow = "hidden";
+                }, 20);
+
+                lastSwitchRef.current = now + 100;
+                setTimeout(() => setIsDirectNav(false), 2000);
             } else if (action === "NAV_VIDEOS") {
-                window.scrollTo(0, 0);
+                setIsDirectNav(true);
+                document.body.style.overflow = "auto";
+                window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+                document.documentElement.scrollTop = 0;
+
                 setVirtualScroll(page1Max + 20);
                 virtualScrollRef.current = page1Max + 20;
                 setIsPhoalbumActive(true);
                 setIsVideosActive(true);
                 setIsWorksActive(false);
-                setIsDirectNav(true);
                 setIsIdeaActive(false);
-                document.body.style.overflow = "hidden";
-                lastSwitchRef.current = now + 400;
-                setTimeout(() => setIsDirectNav(false), 800);
+
+                setTimeout(() => {
+                    window.scrollTo(0, 0);
+                    document.documentElement.scrollTop = 0;
+                    document.body.style.overflow = "hidden";
+                }, 20);
+
+                lastSwitchRef.current = now + 100;
+                setTimeout(() => setIsDirectNav(false), 2000);
             } else if (action === "NAV_WORKS") {
+                const alreadyInWorks = isWorksActiveRef.current;
                 setIsPhoalbumActive(true);
                 setIsVideosActive(true);
                 setIsIdeaActive(false); // Explicitly clear Section 04 when going to 03
                 setIsWorksActive(true);
-                setIsDirectNav(true);
-                setIsWorksEntering(true);
 
-                // Synchronously max out virtual scroll to anchor the background tiers
-                setVirtualScroll(maxVirtualScroll + 20);
-                virtualScrollRef.current = maxVirtualScroll + 20;
+                if (alreadyInWorks) {
+                    // Already inside works container — smooth scroll to exact mount point
+                    setIsIdeaActive(false);
+                    if (section3Ref.current) {
+                        section3Ref.current.scrollIntoView({ behavior: "smooth", block: "start" });
+                    } else {
+                        setTimeout(() => window.scrollTo({ top: 0, behavior: "smooth" }), 10);
+                    }
+                    lastSwitchRef.current = now + 100;
+                } else {
+                    setIsDirectNav(true);
+                    setIsWorksEntering(true);
 
-                setTimeout(() => {
-                    window.scrollTo(0, 0);
-                    setIsWorksEntering(false);
-                    setIsDirectNav(false);
-                    document.body.style.overflow = "auto";
-                    lastSwitchRef.current = Date.now() + 200;
-                }, 50);
+                    const actualMax = Math.max(Math.round(Math.max(window.innerHeight - 80, 0) * 0.28), 120) * 2.2;
+                    setVirtualScroll(actualMax + 20);
+                    virtualScrollRef.current = actualMax + 20;
+
+                    setTimeout(() => {
+                        window.scrollTo(0, 0);
+                        setIsWorksEntering(false);
+                        setIsDirectNav(false);
+                        document.body.style.overflow = "auto";
+                        lastSwitchRef.current = Date.now() + 200;
+                    }, 50);
+                }
             } else if (action === "NAV_IDEA") {
+                const alreadyInWorks = isWorksActiveRef.current;
                 setIsPhoalbumActive(true);
                 setIsVideosActive(true);
                 setIsWorksActive(true);
                 setIsIdeaActive(true);
-                setIsWorksEntering(true);
-                setIsDirectNav(true);
 
-                setVirtualScroll(maxVirtualScroll + 20);
-                virtualScrollRef.current = maxVirtualScroll + 20;
-
-                setTimeout(() => {
-                    const offset = window.innerHeight;
-                    window.scrollTo(0, offset);
-                    setIsWorksEntering(false);
-                    setIsDirectNav(false);
-                    document.body.style.overflow = "auto";
-                    lastSwitchRef.current = Date.now() + 200;
-                }, 50);
+                if (alreadyInWorks) {
+                    // Already inside works container — smooth scroll to section4 (Some Idea)
+                    setIsIdeaActive(true);
+                    setTimeout(() => {
+                        if (section4Ref.current) {
+                            section4Ref.current.scrollIntoView({ behavior: "smooth", block: "start" });
+                        } else {
+                            window.scrollTo({ top: window.innerHeight, behavior: "smooth" });
+                        }
+                    }, 50);
+                    lastSwitchRef.current = now + 100;
+                } else {
+                    setIsWorksEntering(true);
+                    setIsDirectNav(true);
+                    setVirtualScroll(maxVirtualScroll + 20);
+                    virtualScrollRef.current = maxVirtualScroll + 20;
+                    setTimeout(() => {
+                        const offset = window.innerHeight;
+                        window.scrollTo(0, offset);
+                        setIsWorksEntering(false);
+                        setIsDirectNav(false);
+                        document.body.style.overflow = "auto";
+                        lastSwitchRef.current = Date.now() + 200;
+                    }, 50);
+                }
             }
 
             // Fallback for any fast actions that didn't set a future lockout
@@ -474,6 +624,45 @@ export default function LandingPage() {
         const event = new CustomEvent("activeSectionChanged", { detail: section });
         window.dispatchEvent(event);
     }, [isPhoalbumActive, isVideosActive, isWorksActive, isIdeaActive, isAboutPageActive]);
+
+    // Force strict scroll reset and lock when in fixed sections (Except My Works)
+    useEffect(() => {
+        const isFullscreenFixed = (isPhoalbumActive || isVideosActive || isAboutPageActive) && !isWorksActive;
+
+        if (isFullscreenFixed) {
+            const forceReset = () => {
+                window.scrollTo(0, 0);
+                document.documentElement.scrollTop = 0;
+                document.body.scrollTop = 0;
+                // Double check to prevent browser "restoration" of scroll
+                if (window.scrollY !== 0) window.scrollTo({ top: 0, behavior: "instant" });
+            };
+
+            forceReset();
+
+            // Multi-stage reinforcement to fight back against 
+            // browser's layout shift during Section 03/04 unmounting
+            const raf1 = requestAnimationFrame(forceReset);
+            const raf2 = requestAnimationFrame(() => requestAnimationFrame(forceReset));
+            const timer1 = setTimeout(forceReset, 30);
+            const timer2 = setTimeout(forceReset, 150);
+
+            document.body.style.overflow = "hidden";
+            document.documentElement.style.overflow = "hidden";
+
+            return () => {
+                cancelAnimationFrame(raf1);
+                cancelAnimationFrame(raf2);
+                clearTimeout(timer1);
+                clearTimeout(timer2);
+                document.body.style.overflow = "auto";
+                document.documentElement.style.overflow = "";
+            };
+        } else {
+            // Restore immediately if we enter works/idea realm
+            document.documentElement.style.overflow = "";
+        }
+    }, [isPhoalbumActive, isVideosActive, isWorksActive, isAboutPageActive]);
 
     // Detect Section 04 with IntersectionObserver
     useEffect(() => {
@@ -533,6 +722,25 @@ export default function LandingPage() {
         };
     }, []);
 
+    // Sync URL hash with current section so refresh preserves position
+    useEffect(() => {
+        const path = location.pathname;
+        // Only update URL for paths that don't already have a route
+        if (path === "/" || path === "") {
+            if (isWorksActive && isIdeaActive) {
+                window.history.replaceState(null, "", "#/ideas");
+            } else if (isWorksActive) {
+                window.history.replaceState(null, "", "#/portfolio");
+            } else if (isVideosActive) {
+                window.history.replaceState(null, "", "#/videos-section");
+            } else if (isPhoalbumActive) {
+                window.history.replaceState(null, "", "#/phoalbum-section");
+            } else {
+                window.history.replaceState(null, "", "#/");
+            }
+        }
+    }, [isPhoalbumActive, isVideosActive, isWorksActive, isIdeaActive, location.pathname]);
+
     // Phoalbum Data for Preview
     const phoalbumItems = [
         { src: getAssetPath("/photography/page_1_01.webp"), alt: "01-1" },
@@ -547,7 +755,8 @@ export default function LandingPage() {
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: 0 }}
             transition={{ duration: 0.7, ease: [0.76, 0, 0.24, 1] }}
-            className="relative min-h-[100dvh] bg-[#F2F2F2] text-[#111] overflow-x-hidden pt-16"
+            className={`relative min-h-[100dvh] bg-[#F2F2F2] text-[#111] overflow-x-hidden pt-16 ${(!isWorksActive) ? 'fixed inset-0 h-screen overflow-hidden' : ''}`}
+            style={{ top: 0, left: 0 }}
         >
             {/* Add Inspiration Overlay - Moved to top-level for consistent centering */}
             <AnimatePresence>
@@ -650,8 +859,8 @@ export default function LandingPage() {
             <motion.div
                 className="fixed top-[35%] right-4 md:right-8 z-[10010]"
                 animate={{
-                    opacity: (isPhoalbumActive || isAboutPageActive || isVideosActive) ? 0 : 1,
-                    pointerEvents: (isPhoalbumActive || isAboutPageActive || isVideosActive) ? "none" : "auto"
+                    opacity: (isPhoalbumActive || isAboutPageActive || isVideosActive || isVideosPageActive) ? 0 : 1,
+                    pointerEvents: (isPhoalbumActive || isAboutPageActive || isVideosActive || isVideosPageActive) ? "none" : "auto"
                 }}
                 transition={{ duration: 0.7, ease: [0.76, 0, 0.24, 1] }}
             >
@@ -668,8 +877,8 @@ export default function LandingPage() {
             <motion.div
                 className="fixed top-[calc(35%+35px)] right-4 md:right-8 z-[10010]"
                 animate={{
-                    opacity: (isPhoalbumActive || isAboutPageActive || isVideosActive) ? 0 : 1,
-                    pointerEvents: (isPhoalbumActive || isAboutPageActive || isVideosActive) ? "none" : "auto"
+                    opacity: (isPhoalbumActive || isAboutPageActive || isVideosActive || isVideosPageActive) ? 0 : 1,
+                    pointerEvents: (isPhoalbumActive || isAboutPageActive || isVideosActive || isVideosPageActive) ? "none" : "auto"
                 }}
                 transition={{ duration: 0.7, ease: [0.76, 0, 0.24, 1] }}
             >
@@ -706,8 +915,8 @@ export default function LandingPage() {
                 }}
                 className="fixed top-[-10px] left-8 md:top-[-20px] md:left-12 z-[10010] hint-bounce-animation cursor-grab active:cursor-grabbing"
                 style={{
-                    opacity: (showHint && !isPhoalbumActive && !isAboutPageActive && !isVideosActive && !isWorksActive) ? revealProgress : 0,
-                    pointerEvents: (showHint && !isPhoalbumActive && !isAboutPageActive && !isVideosActive && !isWorksActive && revealProgress > 0.1) ? "auto" : "none",
+                    opacity: (showHint && !isPhoalbumActive && !isAboutPageActive && !isVideosActive && !isWorksActive && !isVideosPageActive) ? revealProgress : 0,
+                    pointerEvents: (showHint && !isPhoalbumActive && !isAboutPageActive && !isVideosActive && !isWorksActive && !isVideosPageActive && revealProgress > 0.1) ? "auto" : "none",
                     transition: 'opacity 0.5s ease-in-out'
                 }}
             >
@@ -725,6 +934,10 @@ export default function LandingPage() {
                 {/* --- PHASE 1 CONTAINER --- */}
                 <motion.div
                     className="absolute inset-0 w-full h-full"
+                    initial={{
+                        y: (isPhoalbumActive || isVideosActive || isWorksActive) ? "-100vh" : 0,
+                        opacity: (isPhoalbumActive || isVideosActive || isWorksActive) ? 0 : 1
+                    }}
                     animate={{
                         y: (isPhoalbumActive || isVideosActive || isWorksActive) ? "-100vh" : 0,
                         opacity: (isPhoalbumActive || isVideosActive || isWorksActive) ? 0 : 1
@@ -920,7 +1133,7 @@ export default function LandingPage() {
                     <div
                         className="absolute bottom-24 left-1/2 transform -translate-x-1/2 z-[200]"
                         style={{
-                            opacity: (isPhoalbumActive || isAboutPageActive || isVideosActive) ? 0 : arrowOpacity,
+                            opacity: (isPhoalbumActive || isAboutPageActive || isVideosActive || isVideosPageActive) ? 0 : arrowOpacity,
                             transition: 'opacity 0.5s ease-in-out'
                         }}
                     >
@@ -1063,7 +1276,7 @@ export default function LandingPage() {
                 {/* --- PHASE 3 CONTAINER (Videos) --- */}
                 <motion.div
                     className="absolute inset-0 w-full h-full flex items-center justify-center pointer-events-none"
-                    initial={{ y: "100vh" }}
+                    initial={{ y: isVideosActive ? (isWorksActive ? "-100vh" : "0vh") : "100vh" }}
                     animate={{ y: isVideosActive ? (isWorksActive ? "-100vh" : "0vh") : "100vh" }}
                     transition={{ duration: isDirectNav ? 0 : 0.8, ease: [0.76, 0, 0.24, 1] }}
                     style={{ backgroundColor: "#222222", zIndex: 100 }}
@@ -1081,7 +1294,7 @@ export default function LandingPage() {
                             style={{ fontSize: "36px" }}
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: isVideosActive ? 1 : 0, y: isVideosActive ? 0 : 10 }}
-                            transition={{ delay: 0.5 }}
+                            transition={{ delay: isDirectNav ? 0 : 0.5, duration: isDirectNav ? 0 : 0.3 }}
                         >
                             // 02 Videos
                         </motion.h2>
@@ -1090,7 +1303,7 @@ export default function LandingPage() {
                             style={{ fontSize: "16px", lineHeight: "1.6" }}
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: isVideosActive ? 1 : 0, y: isVideosActive ? 0 : 10 }}
-                            transition={{ delay: 0.6 }}
+                            transition={{ delay: isDirectNav ? 0 : 0.6, duration: isDirectNav ? 0 : 0.3 }}
                         >
                             <p>These videos represent my attempt to leave something behind in this world. The content largely revolves around design education and design history, starting from a minute design detail or visual phenomenon to trace its origins and how it shapes our contemporary perceptions and usage. Beyond relatively systematic research, I also engage in lighter, more offbeat experiments—drawn from daily life, travels, or moments that make me pause for a second look. Regardless of form, they all point to the same thing: preserving the thoughts and curiosities unfolding in the present.</p>
                         </motion.div>
@@ -1105,7 +1318,7 @@ export default function LandingPage() {
                                     x: window.innerWidth >= 768 ? 676 : 0,
                                     y: window.innerWidth >= 768 ? (isVideosActive ? -40 : -30) : 0
                                 }}
-                                transition={{ delay: 0.7, duration: 0.25, ease: [0.76, 0, 0.24, 1] }}
+                                transition={{ delay: isDirectNav ? 0 : 0.7, duration: isDirectNav ? 0 : 0.25, ease: [0.76, 0, 0.24, 1] }}
                             >
                                 <img src={getAssetPath("/videos-section-img.webp")} alt="" className="w-full h-auto" />
                             </motion.div>
@@ -1120,7 +1333,7 @@ export default function LandingPage() {
                                         x: window.innerWidth >= 768 ? -484 : 0,
                                         y: window.innerWidth >= 768 ? (isVideosActive ? -10 : 0) : 0
                                     }}
-                                    transition={{ delay: 0.8, duration: 0.25, ease: [0.76, 0, 0.24, 1] }}
+                                    transition={{ delay: isDirectNav ? 0 : 0.8, duration: isDirectNav ? 0 : 0.25, ease: [0.76, 0, 0.24, 1] }}
                                 >
                                     <video
                                         src={getAssetPath("/video-intro.mp4")}
@@ -1148,8 +1361,8 @@ export default function LandingPage() {
                                         y: window.innerWidth >= 768 ? (isVideosActive ? -240 : -230) : 0
                                     }}
                                     transition={{
-                                        delay: 0.9,
-                                        duration: 0.25,
+                                        delay: isDirectNav ? 0 : 0.9,
+                                        duration: isDirectNav ? 0 : 0.25,
                                         ease: [0.76, 0, 0.24, 1]
                                     }}
                                 >
@@ -1184,7 +1397,7 @@ export default function LandingPage() {
                         className="relative w-full bg-[#f2f2f2] z-[200]"
                         initial={{ y: "100vh" }}
                         animate={{ y: 0 }}
-                        exit={{ y: "100vh" }}
+                        exit={isDirectNav ? false : { y: "100vh" }}
                         transition={{
                             duration: isDirectNav ? 0 : 0.8,
                             ease: [0.76, 0, 0.24, 1]
@@ -1214,13 +1427,14 @@ export default function LandingPage() {
                             <div className="relative z-10">
 
                                 {/* Section 03 - My Works */}
-                                <section id="works-section-mount" ref={section3Ref} className="relative min-h-screen z-10 flex flex-col justify-center">
+                                <section id="works-section-mount" ref={section3Ref} className="relative min-h-screen z-10 flex flex-col justify-center" style={{ scrollMarginTop: "80px" }}>
                                     <div
                                         className="w-full mx-auto"
                                         style={{
                                             maxWidth: phase2ContentMaxWidth,
-                                            padding: phase2ContentPadding,
-                                            marginTop: "-70px" // 调整参数在此行：整体上移
+                                            paddingLeft: phase2ContentPadding,
+                                            paddingRight: phase2ContentPadding,
+                                            marginTop: "-75px", // 调整此处参数：控制 My Works 表格的整体垂直位置 (如 "-50px" 上移，"50px" 下移)
                                         }}
                                     >
                                         {/* Unified Section 03 Container - All in One Border */}

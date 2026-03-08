@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { getAssetPath } from "../utils/paths";
@@ -53,15 +53,46 @@ export default function Navbar() {
     };
   }, []);
 
-  // Clear active section when moving away from home
+  // Clear active section when moving completely away from the portfolio realm
   useEffect(() => {
-    if (location.pathname !== "/") {
+    const isLandingPagePath = location.pathname === '/' ||
+      location.pathname === '/portfolio' ||
+      location.pathname === '/ideas' ||
+      location.pathname.startsWith('/portfolio/') ||
+      location.pathname.startsWith('/phoalbum') ||
+      location.pathname.startsWith('/videos');
+
+    if (!isLandingPagePath) {
       setActiveSection(null);
     }
   }, [location.pathname]);
 
   const isDark = activeSection === "Videos" || isAboutActive || location.pathname === "/videos";
   const isGlass = activeSection === "My Works" || activeSection === "Some Idea";
+
+  // Calculate the single "winning" active name to prevent double-line bug
+  const currentActiveName = useMemo(() => {
+    const path = location.pathname;
+
+    // Level 1: Precise sync signal from LandingPage (Home/Portfolio/Ideas scroll)
+    // If LandingPage is sending a signal, it is the ABSOLUTE TRUTH.
+    // If signal is "Home", we return null (no underline for hero section).
+    if (activeSection) {
+      if (activeSection === "Home") return null;
+      return activeSection;
+    }
+
+    // Level 2: Dedicated sub-pages (not managed by LandingPage scroll)
+    if (path === "/about") return "About meee^";
+    if (path === "/videos" || path.startsWith("/videos")) return "Videos";
+    if (path.startsWith("/gallery")) return "Phoalbum";
+
+    // Level 3: Initial Route fallback (before LandingPage triggers or sends signal)
+    if (path.startsWith("/portfolio")) return "My Works";
+    if (path.startsWith("/ideas")) return "Some Idea";
+
+    return null;
+  }, [location.pathname, activeSection]);
 
   return (
     <nav className={`fixed top-0 left-0 w-full z-[10001] py-4 px-8 flex justify-between items-center transition-colors duration-300 ${isDark
@@ -107,16 +138,24 @@ export default function Navbar() {
                   to={link.path}
                   onClick={(e) => {
                     if (link.action) {
-                      if (location.pathname !== '/') {
-                        // If not on home, the Link 'to' property will naturally route to /#hash
-                        // which is fine, but we also want to ensure state resets
-                        window.dispatchEvent(new CustomEvent("resetHome"));
-                      }
+                      const isLandingPagePath = location.pathname === '/' ||
+                        location.pathname === '/portfolio' ||
+                        location.pathname === '/ideas' ||
+                        location.pathname.startsWith('/portfolio/');
 
-                      // For smooth in-page transitions if already on home
-                      setTimeout(() => {
-                        window.dispatchEvent(new CustomEvent("navAction", { detail: link.action }));
-                      }, 50);
+                      if (!isLandingPagePath) {
+                        // Coming from external route (Gallery etc.) — reset and give LandingPage
+                        // extra time to mount before dispatching the navAction
+                        window.dispatchEvent(new CustomEvent("resetHome"));
+                        setTimeout(() => {
+                          window.dispatchEvent(new CustomEvent("navAction", { detail: link.action }));
+                        }, 300); // Longer delay — LandingPage needs to mount first
+                      } else {
+                        // Already on LandingPage — fire immediately
+                        setTimeout(() => {
+                          window.dispatchEvent(new CustomEvent("navAction", { detail: link.action }));
+                        }, 50);
+                      }
                     }
                   }}
                   className={`px-2 py-[2px] transition-all duration-75 block ${hoveredLink === link.name
@@ -128,14 +167,14 @@ export default function Navbar() {
                 </Link>
 
                 {/* Dynamic Underline Indicator */}
-                {((activeSection === link.name && location.pathname === "/") || (location.pathname === link.path)) && (
+                {currentActiveName === link.name && (
                   <motion.div
-                    key={activeSection + location.pathname}
+                    key={link.name}
                     className={`absolute bottom-[-1px] left-0 w-full h-[2px] ${isDark ? "bg-white" : "bg-black"}`}
-                    initial={{ scaleX: 0.01 }}
+                    initial={{ scaleX: 0 }}
                     animate={{ scaleX: 1 }}
                     style={{ originX: 0.5 }}
-                    transition={{ type: "spring", stiffness: 100, damping: 20, mass: 1 }}
+                    transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
                   />
                 )}
 

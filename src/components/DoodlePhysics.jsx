@@ -43,15 +43,16 @@ export default function DoodlePhysics({ isActive }) {
         // Lighter gravity as requested
         engine.gravity.y = 0.4;
 
-        const containerWidth = containerRef.current.clientWidth;
-        const containerHeight = containerRef.current.clientHeight;
+        // Use window dimensions to avoid 0x0 container size on hidden mount
+        const getW = () => window.innerWidth;
+        const getH = () => window.innerHeight;
 
         const render = Matter.Render.create({
             canvas: canvasRef.current,
             engine: engine,
             options: {
-                width: containerWidth,
-                height: containerHeight,
+                width: getW(),
+                height: getH(),
                 background: 'transparent',
                 wireframes: false,
                 pixelRatio: window.devicePixelRatio || 1
@@ -61,20 +62,21 @@ export default function DoodlePhysics({ isActive }) {
 
         // Boundaries
         const thickness = 300;
-        // Ground exactly at bottom
+        // Ground exactly at bottom of the canvas
+        // We use render.options.height to ensure it's synced with the actual canvas height
         const ground = Matter.Bodies.rectangle(
-            containerWidth / 2, containerHeight + thickness / 2 - 25,
-            containerWidth * 10, thickness,
+            render.options.width / 2, render.options.height + thickness / 2 - 5,
+            render.options.width * 10, thickness,
             { isStatic: true, render: { visible: false } }
         );
         const leftWall = Matter.Bodies.rectangle(
-            -thickness / 2, containerHeight / 2,
-            thickness, containerHeight * 5,
+            -thickness / 2, render.options.height / 2,
+            thickness, render.options.height * 5,
             { isStatic: true, render: { visible: false } }
         );
         const rightWall = Matter.Bodies.rectangle(
-            containerWidth + thickness / 2, containerHeight / 2,
-            thickness, containerHeight * 5,
+            render.options.width + thickness / 2, render.options.height / 2,
+            thickness, render.options.height * 5,
             { isStatic: true, render: { visible: false } }
         );
 
@@ -87,13 +89,14 @@ export default function DoodlePhysics({ isActive }) {
 
         const handleResize = () => {
             if (!containerRef.current) return;
-            const newW = containerRef.current.clientWidth;
-            const newH = containerRef.current.clientHeight;
+            const newW = getW();
+            const newH = getH();
             render.options.width = newW;
             render.options.height = newH;
             render.canvas.width = newW;
             render.canvas.height = newH;
             Matter.Body.setPosition(ground, { x: newW / 2, y: newH + thickness / 2 - 25 });
+            Matter.Body.setPosition(leftWall, { x: -thickness / 2, y: newH / 2 });
             Matter.Body.setPosition(rightWall, { x: newW + thickness / 2, y: newH / 2 });
         };
         window.addEventListener('resize', handleResize);
@@ -128,7 +131,7 @@ export default function DoodlePhysics({ isActive }) {
     const spawnDoodles = () => {
         if (!engineRef.current || !containerRef.current) return;
 
-        const width = containerRef.current.clientWidth;
+        const width = canvasRef.current.width / (window.devicePixelRatio || 1);
         const bodies = [];
         const count = 60; // 👈 Denser dump
 
@@ -137,7 +140,7 @@ export default function DoodlePhysics({ isActive }) {
             const x = Math.random() * (width - 150) + 75;
             // Spread vertical spawn even more to prevent physics "explosions" from overlap at t=0
             const y = -150 - (i * 45);
-            const scale = window.innerWidth > 768 ? 0.42 : 0.28;
+            const scale = width > 768 ? 0.42 : 0.28;
 
             /**
              * MAXIMUM REPULSION (Referencing falling fonts logic):

@@ -141,7 +141,7 @@ export default function Videos() {
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ duration: 0.8, ease: [0.76, 0, 0.24, 1] }}
-            className="fixed inset-0 bg-[#222222] text-white overflow-hidden flex flex-col justify-between pt-20 pb-6 box-border z-[100]"
+            className="fixed inset-0 bg-[#222222] text-white overflow-hidden flex flex-col justify-between pt-20 pb-6 box-border z-[500]"
         >
             {/* 全局固定 Click 提示 - 恢复 mode="wait" 以确保 100->0->100 的透明度变化可见 */}
             <AnimatePresence mode="wait">

@@ -1478,7 +1478,7 @@ export default function LandingPage() {
 
 
                                 {/* Section 04 - Some Ideas */}
-                                <section id="idea-section-mount" ref={section4Ref} className="relative min-h-screen z-10 flex flex-col justify-center pb-24">
+                                <section id="idea-section-mount" ref={section4Ref} className="relative min-h-screen z-10 flex flex-col justify-center pb-0">
                                     <div className="w-full mx-auto" style={{ maxWidth: phase2ContentMaxWidth, padding: phase2ContentPadding, paddingBottom: 0 }}>
                                         <h2 className="font-['HYPixel'] text-[#111] mb-10 tracking-tight" style={{ fontSize: "36px" }}>
                                     // 04 Some Ideas

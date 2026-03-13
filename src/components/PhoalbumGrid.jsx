@@ -2,15 +2,16 @@ import React from "react";
 import { motion } from "framer-motion";
 
 const chapters = [
-    { left: { name: "PROLOGUE_序章", slug: "introduce" }, right: { name: "JAPAN_日本", slug: "japan" } },
-    { left: { name: "BEIJING_北京", slug: "beijing" }, right: { name: "GANSU_甘肃", slug: "gansu" } },
-    { left: { name: "WUXI_无锡", slug: "wuxi" }, right: { name: "JINGDEZHEN_景德镇", slug: "jingdezhen" } },
+    { left: { name: "PROLOGUE_序章", slug: "introduce" }, right: { name: "HUZHOU_湖州", slug: "zhejiang" } },
+    { left: { name: "BEIJING_北京", slug: "beijing" }, right: { name: "JAPAN_日本", slug: "japan" } },
+    { left: { name: "WUXI_无锡", slug: "wuxi" }, right: { name: "GANSU_甘肃", slug: "gansu" } },
+    { left: { name: "SUZHOU_苏州", slug: "suzhou" }, right: { name: "JINGDEZHEN_景德镇", slug: "jingdezhen" } },
     { left: { name: "HANGZHOU_杭州", slug: "hangzhou" }, right: { name: "CHANGSHU_常熟", slug: "changshu" } },
     { left: { name: "SHANGHAI_上海", slug: "shanghai" }, right: { name: "XIAMEN_厦门", slug: "xiamen" } },
     { left: { name: "WUHAN_武汉", slug: "wuhan" }, right: { name: "YUNNAN_云南", slug: "yunnan" } },
-    { left: { name: "SHENNONGJIA_神农架", slug: "shennongjia" }, right: { name: "FENGDU_丰都", slug: "fengdu" } },
-    { left: { name: "SINGAPORE_新加坡", slug: "singapore" }, right: { name: "NANJING_南京", slug: "nanjing" } },
-    { left: { name: "HUZHOU_湖州", slug: "zhejiang" }, right: { name: "GRADUATION_毕业", slug: "graduation" } },
+    { left: { name: "SHENNONGJIA_神农架", slug: "shennongjia" }, right: { name: "CHONGQING_重庆", slug: "fengdu" } },
+    { left: { name: "BUSAN_釜山", slug: "busan" }, right: { name: "NANJING_南京", slug: "nanjing" } },
+    { left: { name: "SINGAPORE_新加坡", slug: "singapore" }, right: { name: "GRADUATION_毕业", slug: "graduation" } },
 ];
 
 function ChapterBtn({ chapter, onSelect, delay = 0 }) {

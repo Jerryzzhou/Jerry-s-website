@@ -30,7 +30,7 @@ const InspirationWords = ({
         } else {
             const fontSize = item.fontSize || (37 + Math.random() * (160 - 37));
             itemWidth = item.content.length * (fontSize * 0.6) + 30;
-            itemHeight = fontSize * 1.1;
+            itemHeight = fontSize * 0.88; // Tighter fit for pixel fonts
             item.fontSize = fontSize; // Save it back
         }
 
@@ -274,7 +274,7 @@ const InspirationWords = ({
             {activeWords.map(item => (
                 <div
                     key={item.id}
-                    className="absolute flex items-center justify-center group pointer-events-auto transition-opacity"
+                    className="absolute flex items-end justify-center group pointer-events-auto transition-opacity"
                     style={{
                         left: item.x,
                         top: item.y,
@@ -294,6 +294,7 @@ const InspirationWords = ({
                             fontSize: `${item.fontSize}px`,
                             color: '#111',
                             whiteSpace: 'nowrap',
+                            lineHeight: 1, // Ensure no extra space at bottom
                         }}>
                             {item.content}
                         </div>

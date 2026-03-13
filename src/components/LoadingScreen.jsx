@@ -53,7 +53,7 @@ export default function LoadingScreen({ onComplete }) {
 
         const timeout = setTimeout(() => {
             onComplete();
-        }, 3600);
+        }, 3500);
 
         return () => {
             clearInterval(dotsInterval);

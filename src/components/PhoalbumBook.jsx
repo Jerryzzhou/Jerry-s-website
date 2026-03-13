@@ -191,7 +191,7 @@ export default function PhoalbumBook({
                 >
                   <div className="cover-visual-content">
                     <img
-                      src={getAssetPath("/phoalbum-cover.webp")}
+                      src={getAssetPath("/phoalbum-cover_new.png")}
                       alt="Phoalbum Cover"
                       className="cover-img"
                       style={{ objectFit: "cover", background: "#fff" }}

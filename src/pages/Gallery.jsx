@@ -79,7 +79,7 @@ export default function Gallery() {
     { src: getAssetPath("/photography/page_3_02.webp"), alt: "3-2" },
     { src: getAssetPath("/photography/suzhou_01.png"), alt: "suzhou-1" },
     { src: getAssetPath("/photography/suzhou_02.png"), alt: "suzhou-2" },
-    { src: getAssetPath("/photography/page_4_01.webp"), alt: "4-1" },
+    { src: getAssetPath("/photography/hangzhou_01.png"), alt: "4-1" },
     { src: getAssetPath("/photography/page_4_02.webp"), alt: "4-2" },
     { src: getAssetPath("/photography/page_5_01.webp"), alt: "5-1" },
     { src: getAssetPath("/photography/page_5_02.webp"), alt: "5-2" },

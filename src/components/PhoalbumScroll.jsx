@@ -36,25 +36,23 @@ const generateItems = (cityId) => {
 
   if (hasCover) {
     // 序章：使用指定的前缀（或者无前缀）
-    items.push({ type: 'single', src: `/photography/${folder}/${prefix}00.png` });
-    items.push({ type: 'single', src: `/photography/${folder}/${prefix}01.png`, narrative });
+    items.push({ type: 'single', src: `/photography/${folder}/${prefix}00.webp` });
+    items.push({ type: 'single', src: `/photography/${folder}/${prefix}01.webp`, narrative });
     for (let i = 2; i <= end; i += 2) {
       items.push({
         type: 'spread',
-        left: `/photography/${folder}/${prefix}0${i}.png`,
-        right: `/photography/${folder}/${prefix}0${i + 1}.png`
+        left: `/photography/${folder}/${prefix}0${i}.webp`,
+        right: `/photography/${folder}/${prefix}0${i + 1}.webp`
       });
     }
   } else {
-    // 普通城市：全量两两组合
+    // 城市章节：使用统一的前缀格式
     for (let i = start; i <= end; i += 2) {
-      if (i + 1 <= end) {
-        items.push({
-          type: 'spread',
-          left: `/photography/${folder}/${prefix}${i}.png`,
-          right: `/photography/${folder}/${prefix}${i + 1}.png`
-        });
-      }
+      items.push({
+        type: 'spread',
+        left: `/photography/${folder}/${prefix}${i}.webp`,
+        right: `/photography/${folder}/${prefix}${i + 1}.webp`
+      });
     }
   }
   return items;

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import PhoalbumBook from "../components/PhoalbumBook";
 import PhoalbumGrid from "../components/PhoalbumGrid";
@@ -7,6 +7,7 @@ import { getAssetPath } from "../utils/paths";
 
 export default function Gallery() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [isBookOpen, setIsBookOpen] = useState(false);
   const [isTurning, setIsTurning] = useState(false);
   const [targetIndex, setTargetIndex] = useState(null);
@@ -29,13 +30,19 @@ export default function Gallery() {
 
   const handleChapterSelect = (slug) => {
     const indexMap = {
-      'introduce': 0, 'beijing': 1, 'wuxi': 2, 'hangzhou': 3, 'shanghai': 4,
-      'wuhan': 5, 'shennongjia': 6, 'busan': 7, 'singapore': 8, 'zhejiang': 9,
-      'japan': 10, 'gansu': 11, 'jingdezhen': 12, 'changshu': 13, 'xiamen': 14,
-      'yunnan': 15, 'fengdu': 16, 'nanjing': 17, 'graduation': 18, 'end': 19
+      'introduce': 0, 'beijing': 1, 'wuxi': 2, 'suzhou': 3, 'hangzhou': 4, 'shanghai': 5,
+      'wuhan': 6, 'shennongjia': 7, 'busan': 8, 'singapore': 9, 'huzhou': 10,
+      'japan': 11, 'gansu': 12, 'jingdezhen': 13, 'changshu': 14, 'xiamen': 15,
+      'yunnan': 16, 'chongqing': 17, 'nanjing': 18, 'graduation': 19, 'end': 20
     };
     const idx = indexMap[slug];
     if (idx !== undefined) {
+      // 除了 End 页面，所有章节均支持进入滚动详情页
+      if (slug !== 'end') {
+        navigate(`/photography/${slug}`);
+        return;
+      }
+      
       setTargetIndex(idx);
       // 给一点延迟后重置，确保下次点击同一章节也能触发 useEffect
       setTimeout(() => setTargetIndex(null), 100);
@@ -147,6 +154,14 @@ export default function Gallery() {
             onTurnChange={setIsTurning}
             onIndexChange={setCurrentIndex}
             targetIndex={targetIndex}
+            onEnterChapter={() => {
+              // 找到当前章节的 slug 并跳转
+              const slugs = ['introduce', 'beijing', 'wuxi', 'suzhou', 'hangzhou', 'shanghai', 'wuhan', 'shennongjia', 'busan', 'singapore', 'huzhou', 'japan', 'gansu', 'jingdezhen', 'changshu', 'xiamen', 'yunnan', 'chongqing', 'nanjing', 'graduation', 'end'];
+              const currentSlug = slugs[currentIndex];
+              if (currentSlug !== 'end') {
+                navigate(`/photography/${currentSlug}`);
+              }
+            }}
           />
         </div>
 

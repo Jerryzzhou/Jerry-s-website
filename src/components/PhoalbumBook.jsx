@@ -25,7 +25,8 @@ export default function PhoalbumBook({
   targetIndex = null,     // 👈 新增：外部控制跳转的页码
   className = "",           // 👈 允许外部传入自定义类名以隔离样式
   isOpen: propsIsOpen = undefined, // 👈 新增：可选外部控制开启状态
-  showHint = true           // 👈 新增：控制是否显示点击提示箭头
+  showHint = true,           // 👈 新增：控制是否显示点击提示箭头
+  onEnterChapter = null      // 👈 新增：点击进入章节的回调
 }) {
   const spreads = useMemo(() => {
     if (!Array.isArray(items)) return [];
@@ -319,20 +320,21 @@ export default function PhoalbumBook({
           <>
             {/* 顶部的进入章节提示与箭头 */}
             {/* size/position adjustment provided directly inline for the user to tweak easily */}
-            <div
-              style={{
-                position: 'absolute',
-                top: '-24px', /* ▲ 调整这里控制整体上下位置 */
-                left: '15%',
-                transform: 'translateX(-50%)',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px', /* ▲ 调整字和箭头的间距 */
-                cursor: 'pointer',
-                zIndex: 200,
-                pointerEvents: 'auto' /* 👈 确保可以点击 */
-              }}
-            >
+              <div
+                onClick={() => onEnterChapter && onEnterChapter()}
+                style={{
+                  position: 'absolute',
+                  top: '-24px', /* ▲ 调整这里控制整体上下位置 */
+                  left: '15%',
+                  transform: 'translateX(-50%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px', /* ▲ 调整字和箭头的间距 */
+                  cursor: 'pointer',
+                  zIndex: 200,
+                  pointerEvents: 'auto' /* 👈 确保可以点击 */
+                }}
+              >
               <span style={{
                 color: '#CE6452',
                 fontSize: '18px', /* ▲ 调整文字大小 */

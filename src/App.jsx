@@ -7,6 +7,7 @@ import Videos from "./pages/Videos";
 import About from "./pages/About";
 import Gallery from "./pages/Gallery";
 import Portfolio from "./pages/Portfolio";
+import CityAlbum from "./pages/CityAlbum";
 import LoadingScreen from "./components/LoadingScreen";
 
 function ScrollToTop() {
@@ -66,6 +67,7 @@ function AnimatedRoutes() {
           <Route path="/phoalbum-section" element={<LandingPage />} />
           <Route path="/videos-section" element={<LandingPage />} />
           <Route path="/gallery" element={<Gallery />} />
+          <Route path="/photography/:cityId" element={<CityAlbum />} />
           <Route path="/portfolio/selected" element={<Portfolio />} />
         </Routes>
       </AnimatePresence>

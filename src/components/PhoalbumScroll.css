@@ -1,0 +1,202 @@
+.phoalbum-scroll-container {
+  width: 100%;
+  height: 100vh;
+  overflow-y: auto;
+  background: #f0f0f0;
+  scroll-behavior: smooth;
+  /* 移除 perspective 以免干扰 position: fixed 的视口定位 */
+}
+
+.scroll-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 68px 0 40px 0;
+  /* 调整顶部边距，使其更贴合固定导航栏底部 */
+  gap: 20px;
+}
+
+.album-unit {
+  width: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  display: flex;
+  justify-content: center;
+}
+
+.book-spread-container {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 2 / 1;
+  background: #D9D9D9;
+  box-shadow: none;
+  display: flex;
+  overflow: hidden;
+}
+
+.images-layer {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  z-index: 1;
+}
+
+.page-img {
+  flex: 1;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.page-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover !important;
+  display: block;
+}
+
+/* 阴影与反光图层 - 通过 Portal 挂载到 body，将其层级调至导航栏 (10001) 之下 */
+.global-aesthetic-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  /* 低于导航栏，避免遮挡交互文字 */
+  pointer-events: none;
+  display: flex;
+  justify-content: center;
+}
+
+/* 统一管理中缝阴影 */
+.spine-shadow {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 100px;
+  transform: translateX(-50%);
+  background: linear-gradient(90deg,
+      rgba(0, 0, 0, 0) 0%,
+      rgba(0, 0, 0, 0.1) 25%,
+      rgba(0, 0, 0, 0.6) 49.6%,
+      rgba(0, 0, 0, 0.7) 50%,
+      rgba(0, 0, 0, 0.6) 50.4%,
+      rgba(0, 0, 0, 0.1) 75%,
+      rgba(0, 0, 0, 0) 100%);
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* 页面反光 - 全局叠加，确保在阴影之上 */
+.page-gloss {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  /* 强制覆盖在阴影层之上 */
+  pointer-events: none;
+}
+
+/* 左右对称的反光带：左侧从 -60px 到 -20px，右侧从 +20px 到 +60px */
+.page-gloss::before {
+  content: "";
+  position: absolute;
+  left: calc(50% - 60px);
+  width: 40px;
+  height: 100%;
+  opacity: 0.3;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.3) 50%, rgba(255, 255, 255, 0) 100%);
+}
+
+.page-gloss::after {
+  content: "";
+  position: absolute;
+  left: calc(50% + 20px);
+  width: 40px;
+  height: 100%;
+  opacity: 0.3;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.3) 50%, rgba(255, 255, 255, 0) 100%);
+}
+
+@font-face {
+  font-family: 'iekietongzhenti';
+  src: url('/fonts/义启童真体iekietongzhenti.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* === 00, 01 页大小与位置独立调整区域 === */
+
+/* 【00 页】 (unit-0) - 仅在序章模式下作为封面应用 */
+.introduce-mode .unit-0 .book-spread-container,
+.prologue-mode .unit-0 .book-spread-container {
+  width: 1470px !important;
+  /* <--- 直接写像素值 (如 800px, 1000px) 可以彻底打破大小限制 */
+  aspect-ratio: 1 / 1.1 !important;
+  /* <--- 调整比例 (如 1 / 1.2) 改变垂直高度 */
+  height: auto !important;
+  margin: 0 auto;
+  transform: translate(0px, -55px);
+  /* <--- 第一个数【左右】，第二个数【上下】微调封面图 */
+}
+
+/* 【01 页】 (unit-1) ：自由排版模式 - 仅在序章模式下应用 */
+.introduce-mode .unit-1.has-narrative,
+.prologue-mode .unit-1.has-narrative {
+  display: flex;
+  /* 让文字和图片在同一行 */
+  align-items: center;
+  justify-content: center;
+}
+
+.introduce-mode .unit-1.has-narrative .book-spread-container,
+.prologue-mode .unit-1.has-narrative .book-spread-container {
+  width: 650px !important;
+  /* <--- 同上，直接写像素值来改大小 */
+  aspect-ratio: 1 / 1 !important;
+  height: auto !important;
+  margin: 0;
+  /* 移除居中 margin，靠 flex 布局定位 */
+  transform: translate(-5px, 0px);
+  /* <--- 第一个数【左右】，第二个数【上下】微调 01 图片 */
+}
+
+.paper-texture {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.03;
+  pointer-events: none;
+  background-image: url("https://www.transparenttextures.com/patterns/paper.png");
+}
+
+/* 文字位置微调 */
+.page-narrative-left {
+  font-family: 'iekietongzhenti', sans-serif;
+  font-size: 18px;
+  line-height: 1.8;
+  color: #333;
+  max-width: 600px;
+  margin-right: 60px;
+  /* 文字与图片之间的间距 */
+  text-align: left;
+  transform: translateX(-25px);
+  /* <--- 调整这里的数值（如 -20px 或 50px）即可【左右微调文字】的位置 */
+}
+
+/* 章节结束装饰 */
+.chapter-end-mark {
+  font-family: 'iekietongzhenti', sans-serif;
+  font-size: 20px;
+  color: #666; /* 您可以修改这里的颜色代码 */
+  margin-top: 100px;
+  margin-bottom: 80px;
+  text-align: center;
+  letter-spacing: 2px;
+  width: 100%;
+}

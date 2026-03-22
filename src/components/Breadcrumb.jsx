@@ -28,13 +28,13 @@ export const CITY_DISPLAY_NAMES = {
 };
 
 export default function Breadcrumb({ segments }) {
-  // top-[64px] aligns securely flush exactly beneath the global navbar
+  // top-[51px] aligns securely flush exactly beneath the global navbar
   const content = (
     <motion.div 
       initial={{ y: "-100%", opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.4, ease: "easeOut" }}
-      className="fixed top-[64px] left-0 z-[10000] flex items-center w-full"
+      className="fixed top-[51px] left-0 z-[10000] flex items-center w-full"
     >
       <div className="w-full py-2 bg-[#F2F2F2]/95 rounded-none flex items-center justify-center font-['HYPixel'] text-[12px] tracking-widest text-[#111] transition-all">
         {segments.map((seg, idx) => (

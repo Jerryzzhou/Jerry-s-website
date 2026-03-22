@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import PhoalbumBook from "../components/PhoalbumBook";
 import PhoalbumGrid from "../components/PhoalbumGrid";
+import Breadcrumb from "../components/Breadcrumb";
 import { getAssetPath } from "../utils/paths";
 
 export default function Gallery() {
@@ -136,6 +137,7 @@ export default function Gallery() {
       className="min-h-screen pt-32 flex flex-col items-center overflow-x-hidden" 
       style={{ background: '#F2F2F2' }}
     >
+      {isBookOpen && <Breadcrumb segments={[{ name: "City", path: "/gallery?view=overview" }, { name: "CityPage", path: null }]} />}
       {/* 叠层容器：grid 在下，book 在上，视觉重合 */}
       <div className="relative w-full">
 

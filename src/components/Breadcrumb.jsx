@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { createPortal } from "react-dom";
 
 export const CITY_DISPLAY_NAMES = {
   'introduce': 'PROLOGUE_序章',
@@ -28,7 +29,7 @@ export const CITY_DISPLAY_NAMES = {
 
 export default function Breadcrumb({ segments }) {
   // top-[64px] aligns securely flush exactly beneath the global navbar
-  return (
+  const content = (
     <motion.div 
       initial={{ y: "-100%", opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
@@ -51,4 +52,6 @@ export default function Breadcrumb({ segments }) {
       </div>
     </motion.div>
   );
+
+  return createPortal(content, document.body);
 }

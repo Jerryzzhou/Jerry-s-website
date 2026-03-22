@@ -82,7 +82,7 @@ export default function CityAlbum() {
             </button>
             
             <button 
-              onClick={() => navigate('/photography')}
+              onClick={() => navigate('/gallery')}
               className="w-full py-2 font-['DotPixel'] text-[#888] hover:text-[#111] transition-colors text-xs"
             >
               BACK TO GALLERY

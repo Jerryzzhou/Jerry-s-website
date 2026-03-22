@@ -751,10 +751,10 @@ export default function LandingPage() {
 
     return (
         <motion.div
-            initial={{ x: 0, opacity: 1 }}
-            animate={{ x: 0, opacity: 1 }}
-            exit={{ x: 0 }}
-            transition={{ duration: 0.7, ease: [0.76, 0, 0.24, 1] }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.6, ease: "easeInOut" }}
             className={`relative min-h-[100dvh] bg-[#F2F2F2] text-[#111] overflow-x-hidden pt-16 ${(!isWorksActive) ? 'fixed inset-0 h-screen overflow-hidden' : ''}`}
             style={{ top: 0, left: 0 }}
         >

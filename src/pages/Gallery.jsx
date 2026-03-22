@@ -29,6 +29,11 @@ export default function Gallery() {
   }, [location.state, location.search, location.key]);
 
   const handleChapterSelect = (slug) => {
+    if (slug === 'overview') {
+      navigate('/photography/overview');
+      return;
+    }
+    
     const indexMap = {
       'introduce': 0, 'beijing': 1, 'wuxi': 2, 'suzhou': 3, 'hangzhou': 4, 'shanghai': 5,
       'wuhan': 6, 'shennongjia': 7, 'busan': 8, 'singapore': 9, 'huzhou': 10,

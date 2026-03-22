@@ -33,7 +33,7 @@ export default function Breadcrumb({ segments }) {
       initial={{ y: "-100%", opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.4, ease: "easeOut" }}
-      className="fixed top-[64px] left-0 z-[9000] flex items-center w-full"
+      className="fixed top-[64px] left-0 z-[10000] flex items-center w-full"
     >
       <div className="w-full pl-8 pr-6 py-2 bg-white/40 backdrop-blur-md rounded-none flex items-center font-['HYPixel'] text-[12px] tracking-widest text-[#111] transition-all">
         {segments.map((seg, idx) => (

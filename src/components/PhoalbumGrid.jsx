@@ -78,7 +78,7 @@ export default function PhoalbumGrid({ isOpen = false, onSelect }) {
                 transition={{ duration: 0.6, delay: 0.8, ease: "easeOut" }}
                 className="flex items-center justify-between px-6 border-b border-black hover:bg-black hover:text-white transition cursor-pointer"
                 style={{ fontSize: "40px", paddingTop: "20px", paddingBottom: "20px" }}
-                onClick={() => onSelect && onSelect("introduce")}
+                onClick={() => onSelect && onSelect("overview")}
             >
                 <span className="font-['HYPixel'] tracking-widest font-bold">OVERVIEW</span>
                 <span className="font-['HYPixel']" style={{ transform: 'translateX(-20px)', display: 'inline-block' }}>&gt;&gt;&gt;</span>

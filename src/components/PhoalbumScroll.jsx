@@ -28,6 +28,45 @@ const CITY_CONFIG = {
 };
 
 const generateItems = (cityId, overrideFolder) => {
+  if (cityId === 'overview') {
+    const orderedCities = [
+      'introduce', 'beijing', 'wuxi', 'suzhou', 'hangzhou', 'shanghai', 
+      'wuhan', 'shennongjia', 'busan', 'singapore', 'huzhou', 'japan', 
+      'gansu', 'jingdezhen', 'changshu', 'xiamen', 'yunnan', 'chongqing', 
+      'nanjing', 'graduation'
+    ];
+    let allItems = [];
+    
+    orderedCities.forEach(city => {
+      const config = CITY_CONFIG[city];
+      if (!config) return;
+      const { folder, start, end, hasCover, narrative, prefix = 'Jerry-摄影集（不含封面封底终版）_' } = config;
+      // 保证武汉的图片能正常显示（使用正确的 hash 文件夹）
+      const actualFolder = city === 'wuhan' ? '07wuhan_8e9bbac2a0e9cfab' : folder;
+      
+      if (hasCover) {
+        allItems.push({ type: 'single', src: `/photography/${actualFolder}/${prefix}00.webp` });
+        allItems.push({ type: 'single', src: `/photography/${actualFolder}/${prefix}01.webp`, narrative });
+        for (let i = 2; i <= end; i += 2) {
+          allItems.push({
+            type: 'spread',
+            left: `/photography/${actualFolder}/${prefix}0${i}.webp`,
+            right: `/photography/${actualFolder}/${prefix}0${i + 1}.webp`
+          });
+        }
+      } else {
+        for (let i = start; i <= end; i += 2) {
+          allItems.push({
+            type: 'spread',
+            left: `/photography/${actualFolder}/${prefix}${i}.webp`,
+            right: `/photography/${actualFolder}/${prefix}${i + 1}.webp`
+          });
+        }
+      }
+    });
+    return allItems;
+  }
+
   const config = CITY_CONFIG[cityId];
   if (!config) return [];
   

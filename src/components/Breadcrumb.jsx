@@ -29,7 +29,7 @@ export default function Breadcrumb({ segments }) {
   // top-[64px] aligns securely flush exactly beneath the global navbar
   return (
     <div className="fixed top-[64px] left-0 z-[9000] flex items-center w-max max-w-full">
-      <div className="pl-8 pr-6 py-2 pb-2 bg-white/40 backdrop-blur-md border border-white/50 border-l-0 shadow-[0_4px_12px_rgba(0,0,0,0.02)] rounded-none flex items-center font-['HYPixel'] text-[12px] tracking-widest text-[#111] transition-all">
+      <div className="pl-8 pr-6 py-2 pb-2 bg-white/40 backdrop-blur-md border-b border-r border-[#111] shadow-[0_4px_12px_rgba(0,0,0,0.02)] rounded-none flex items-center font-['HYPixel'] text-[12px] tracking-widest text-[#111] transition-all">
         {segments.map((seg, idx) => (
           <React.Fragment key={idx}>
             {seg.path ? (

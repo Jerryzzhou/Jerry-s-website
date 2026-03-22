@@ -27,19 +27,21 @@ export const CITY_DISPLAY_NAMES = {
 
 export default function Breadcrumb({ segments }) {
   return (
-    <div className="fixed top-[85px] left-4 md:left-8 z-[9000] font-['HYPixel'] text-xl tracking-widest text-[#111] flex items-center">
-      {segments.map((seg, idx) => (
-        <React.Fragment key={idx}>
-          {seg.path ? (
-            <Link to={seg.path} className="hover:opacity-60 transition-opacity">
-              {seg.name}
-            </Link>
-          ) : (
-            <span className="opacity-60">{seg.name}</span>
-          )}
-          {idx < segments.length - 1 && <span className="mx-3 opacity-80">&gt;&gt;</span>}
-        </React.Fragment>
-      ))}
+    <div className="fixed top-[80px] left-4 md:left-8 z-[9000] flex items-center">
+      <div className="px-5 py-2.5 bg-white/40 backdrop-blur-md border border-white/50 shadow-[0_4px_20px_rgba(0,0,0,0.03)] rounded-full flex items-center font-['HYPixel'] text-[15px] tracking-widest text-[#111] transition-all">
+        {segments.map((seg, idx) => (
+          <React.Fragment key={idx}>
+            {seg.path ? (
+              <Link to={seg.path} className="hover:opacity-50 transition-opacity">
+                {seg.name}
+              </Link>
+            ) : (
+              <span className="opacity-60">{seg.name}</span>
+            )}
+            {idx < segments.length - 1 && <span className="mx-3 opacity-40 text-xs mt-[2px]">&gt;&gt;</span>}
+          </React.Fragment>
+        ))}
+      </div>
     </div>
   );
 }

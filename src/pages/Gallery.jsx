@@ -30,8 +30,10 @@ export default function Gallery() {
   }, [location.state, location.search, location.key]);
 
   const handleChapterSelect = (slug) => {
+    const fromView = isBookOpen ? 'CityPage' : 'City';
+
     if (slug === 'overview') {
-      navigate('/photography/overview');
+      navigate('/photography/overview', { state: { from: fromView } });
       return;
     }
     
@@ -45,7 +47,7 @@ export default function Gallery() {
     if (idx !== undefined) {
       // 除了 End 页面，所有章节均支持进入滚动详情页
       if (slug !== 'end') {
-        navigate(`/photography/${slug}`);
+        navigate(`/photography/${slug}`, { state: { from: fromView } });
         return;
       }
       

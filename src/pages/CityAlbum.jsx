@@ -1,5 +1,5 @@
 import React from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import PhoalbumScroll from "../components/PhoalbumScroll";
 import Breadcrumb, { CITY_DISPLAY_NAMES } from "../components/Breadcrumb";
 import { motion } from "framer-motion";
@@ -7,10 +7,27 @@ import { motion } from "framer-motion";
 export default function CityAlbum() {
   const { cityId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const [password, setPassword] = React.useState("");
   const [isAuthorized, setIsAuthorized] = React.useState(false);
   const [error, setError] = React.useState(false);
   const [wuhanFolder, setWuhanFolder] = React.useState(null);
+
+  // 根据点击逻辑决定面包屑层级
+  const fromView = location.state?.from || 'CityPage'; // default
+  let breadcrumbSegments = [];
+  if (fromView === 'CityPage') {
+    breadcrumbSegments = [
+      { name: "City", path: "/gallery?view=overview" },
+      { name: "CityPage", path: "/gallery?view=book" },
+      { name: CITY_DISPLAY_NAMES[cityId] || cityId }
+    ];
+  } else {
+    breadcrumbSegments = [
+      { name: "City", path: "/gallery?view=overview" },
+      { name: CITY_DISPLAY_NAMES[cityId] || cityId }
+    ];
+  }
 
   // 验证用的 Hash (保护原密码)
   const EXPECTED_HASH = "adcbeda4115f9604995dd7e52992693496cdb325b54c14449cf5d74f59c74313";
@@ -53,7 +70,7 @@ export default function CityAlbum() {
         animate={{ opacity: 1 }}
         className="fixed inset-0 z-[2000] bg-[#f2f2f2] flex items-center justify-center p-4"
       >
-        <Breadcrumb segments={[{ name: "City", path: "/gallery?view=overview" }, { name: "CityPage", path: "/gallery?view=book" }, { name: CITY_DISPLAY_NAMES[cityId] || cityId }]} />
+        <Breadcrumb segments={breadcrumbSegments} />
         <div className="max-w-md w-full border border-[#111] bg-white/50 backdrop-blur-md p-10 flex flex-col items-center">
           <h2 className="font-['HYPixel'] text-2xl mb-8 text-[#111]">// ACCESS DENIED</h2>
           <p className="font-['DotPixel'] text-sm text-[#545454] mb-10 text-center tracking-tight">
@@ -102,7 +119,7 @@ export default function CityAlbum() {
       exit={{ opacity: 0 }}
       className="city-album-page"
     >
-      <Breadcrumb segments={[{ name: "City", path: "/gallery?view=overview" }, { name: "CityPage", path: "/gallery?view=book" }, { name: CITY_DISPLAY_NAMES[cityId] || cityId }]} />
+      <Breadcrumb segments={breadcrumbSegments} />
       <PhoalbumScroll cityId={cityId} overrideFolder={cityId === 'wuhan' ? wuhanFolder : null} />
     </motion.div>
   );

@@ -63,7 +63,7 @@
 .global-aesthetic-overlay {
   position: fixed;
   inset: 0;
-  z-index: 10000;
+  z-index: 9999;
   /* 低于导航栏，避免遮挡交互文字 */
   pointer-events: none;
   display: flex;

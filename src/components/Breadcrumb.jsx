@@ -35,7 +35,7 @@ export default function Breadcrumb({ segments }) {
       transition={{ duration: 0.4, ease: "easeOut" }}
       className="fixed top-[64px] left-0 z-[10000] flex items-center w-full"
     >
-      <div className="w-full py-2 bg-white/40 backdrop-blur-md rounded-none flex items-center justify-center font-['HYPixel'] text-[12px] tracking-widest text-[#111] transition-all">
+      <div className="w-full py-2 bg-[#F2F2F2]/95 rounded-none flex items-center justify-center font-['HYPixel'] text-[12px] tracking-widest text-[#111] transition-all">
         {segments.map((seg, idx) => (
           <React.Fragment key={idx}>
             {seg.path ? (

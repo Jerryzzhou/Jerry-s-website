@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
 
 export const CITY_DISPLAY_NAMES = {
   'introduce': 'PROLOGUE_序章',
@@ -28,8 +29,13 @@ export const CITY_DISPLAY_NAMES = {
 export default function Breadcrumb({ segments }) {
   // top-[64px] aligns securely flush exactly beneath the global navbar
   return (
-    <div className="fixed top-[64px] left-0 z-[9000] flex items-center w-max max-w-full">
-      <div className="pl-6 pr-6 py-2 pb-2 bg-white/40 backdrop-blur-md border border-[#111] shadow-[0_4px_12px_rgba(0,0,0,0.02)] rounded-none flex items-center font-['HYPixel'] text-[12px] tracking-widest text-[#111] transition-all">
+    <motion.div 
+      initial={{ y: "-100%", opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+      className="fixed top-[64px] left-0 z-[9000] flex items-center w-full"
+    >
+      <div className="w-full pl-8 pr-6 py-2 bg-white/40 backdrop-blur-md rounded-none flex items-center font-['HYPixel'] text-[12px] tracking-widest text-[#111] transition-all">
         {segments.map((seg, idx) => (
           <React.Fragment key={idx}>
             {seg.path ? (
@@ -43,6 +49,6 @@ export default function Breadcrumb({ segments }) {
           </React.Fragment>
         ))}
       </div>
-    </div>
+    </motion.div>
   );
 }

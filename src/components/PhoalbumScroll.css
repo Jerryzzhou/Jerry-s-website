@@ -12,7 +12,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 68px 0 40px 0;
+  padding: 102px 0 40px 0;
   /* 调整顶部边距，使其更贴合固定导航栏底部 */
   gap: 20px;
 }

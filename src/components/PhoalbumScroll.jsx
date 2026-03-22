@@ -27,22 +27,23 @@ const CITY_CONFIG = {
   'graduation': { folder: '20毕业', start: 796, end: 917, hasCover: false, prefix: 'Jerry-摄影集（不含封面封底终版）_' }
 };
 
-const generateItems = (cityId) => {
+const generateItems = (cityId, overrideFolder) => {
   const config = CITY_CONFIG[cityId];
   if (!config) return [];
   
   const { folder, start, end, hasCover, narrative, prefix = 'Jerry-摄影集（不含封面封底终版）_' } = config;
+  const actualFolder = overrideFolder || folder;
   const items = [];
 
   if (hasCover) {
     // 序章：使用指定的前缀（或者无前缀）
-    items.push({ type: 'single', src: `/photography/${folder}/${prefix}00.webp` });
-    items.push({ type: 'single', src: `/photography/${folder}/${prefix}01.webp`, narrative });
+    items.push({ type: 'single', src: `/photography/${actualFolder}/${prefix}00.webp` });
+    items.push({ type: 'single', src: `/photography/${actualFolder}/${prefix}01.webp`, narrative });
     for (let i = 2; i <= end; i += 2) {
       items.push({
         type: 'spread',
-        left: `/photography/${folder}/${prefix}0${i}.webp`,
-        right: `/photography/${folder}/${prefix}0${i + 1}.webp`
+        left: `/photography/${actualFolder}/${prefix}0${i}.webp`,
+        right: `/photography/${actualFolder}/${prefix}0${i + 1}.webp`
       });
     }
   } else {
@@ -50,19 +51,19 @@ const generateItems = (cityId) => {
     for (let i = start; i <= end; i += 2) {
       items.push({
         type: 'spread',
-        left: `/photography/${folder}/${prefix}${i}.webp`,
-        right: `/photography/${folder}/${prefix}${i + 1}.webp`
+        left: `/photography/${actualFolder}/${prefix}${i}.webp`,
+        right: `/photography/${actualFolder}/${prefix}${i + 1}.webp`
       });
     }
   }
   return items;
 };
 
-export default function PhoalbumScroll({ cityId }) {
+export default function PhoalbumScroll({ cityId, overrideFolder }) {
   const location = useLocation();
   
   // 根据 cityId 选择生成的数据
-  const items = generateItems(cityId);
+  const items = generateItems(cityId, overrideFolder);
   
   // 严格检查路径，确保视觉层（阴影、反光）只在详情页出现，不影响城市选择页 (CityPage)
   const isDetailPage = location.pathname.startsWith("/photography/") || 

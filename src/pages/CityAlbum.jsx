@@ -9,17 +9,34 @@ export default function CityAlbum() {
   const [password, setPassword] = React.useState("");
   const [isAuthorized, setIsAuthorized] = React.useState(false);
   const [error, setError] = React.useState(false);
+  const [wuhanFolder, setWuhanFolder] = React.useState(null);
 
-  // 武汉章节专用密码 (724067)
-  const WUHAN_PASS = "724067";
+  // 验证用的 Hash (保护原密码)
+  const EXPECTED_HASH = "adcbeda4115f9604995dd7e52992693496cdb325b54c14449cf5d74f59c74313";
 
-  const handleUnlock = () => {
-    if (password === WUHAN_PASS) {
-      setIsAuthorized(true);
-      setError(false);
-    } else {
+  async function digestMessage(message) {
+    const msgUint8 = new TextEncoder().encode(message);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  const handleUnlock = async () => {
+    try {
+      const loginHash = await digestMessage(password + "_login");
+      if (loginHash === EXPECTED_HASH) {
+        // 解密真实防盗链文件夹名
+        const folderHash = await digestMessage(password + "_folder");
+        setWuhanFolder("07wuhan_" + folderHash.substring(0, 16));
+        setIsAuthorized(true);
+        setError(false);
+      } else {
+        setError(true);
+        setPassword("");
+      }
+    } catch (err) {
+      console.error(err);
       setError(true);
-      setPassword("");
     }
   };
 
@@ -83,7 +100,7 @@ export default function CityAlbum() {
       exit={{ opacity: 0 }}
       className="city-album-page"
     >
-      <PhoalbumScroll cityId={cityId} />
+      <PhoalbumScroll cityId={cityId} overrideFolder={cityId === 'wuhan' ? wuhanFolder : null} />
     </motion.div>
   );
 }

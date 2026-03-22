@@ -136,7 +136,7 @@ export default function Gallery() {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.6, ease: "easeInOut" }}
-      className="min-h-screen pt-[162px] flex flex-col items-center overflow-x-hidden" 
+      className="min-h-screen pt-32 flex flex-col items-center overflow-x-hidden" 
       style={{ background: '#F2F2F2' }}
     >
       {isBookOpen && <Breadcrumb segments={[{ name: "City", path: "/gallery?view=overview" }, { name: "CityPage", path: null }]} />}

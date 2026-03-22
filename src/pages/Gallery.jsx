@@ -123,7 +123,14 @@ export default function Gallery() {
   ];
 
   return (
-    <main className="min-h-screen pt-32 flex flex-col items-center" style={{ background: '#F2F2F2' }}>
+    <motion.main 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.6, ease: "easeInOut" }}
+      className="min-h-screen pt-32 flex flex-col items-center overflow-x-hidden" 
+      style={{ background: '#F2F2F2' }}
+    >
       {/* 叠层容器：grid 在下，book 在上，视觉重合 */}
       <div className="relative w-full">
 
@@ -221,6 +228,6 @@ export default function Gallery() {
           </motion.div>
         )}
       </AnimatePresence>
-    </main>
+    </motion.main>
   );
 }

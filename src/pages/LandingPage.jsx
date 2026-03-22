@@ -1395,11 +1395,11 @@ export default function LandingPage() {
                     <motion.div
                         key="works-container"
                         className="relative w-full bg-[#f2f2f2] z-[200]"
-                        initial={{ y: "100vh" }}
-                        animate={{ y: 0 }}
+                        initial={isDirectNav ? { opacity: 0 } : { y: "100vh" }}
+                        animate={isDirectNav ? { opacity: 1 } : { y: 0 }}
                         exit={isDirectNav ? false : { y: "100vh" }}
                         transition={{
-                            duration: isDirectNav ? 0 : 0.8,
+                            duration: isDirectNav ? 0.6 : 0.8,
                             ease: [0.76, 0, 0.24, 1]
                         }}
                         onAnimationComplete={() => {

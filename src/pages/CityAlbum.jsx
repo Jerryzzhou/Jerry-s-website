@@ -2,7 +2,7 @@ import React from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import PhoalbumScroll from "../components/PhoalbumScroll";
 import Breadcrumb, { CITY_DISPLAY_NAMES } from "../components/Breadcrumb";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function CityAlbum() {
   const { cityId } = useParams();
@@ -70,7 +70,9 @@ export default function CityAlbum() {
         animate={{ opacity: 1 }}
         className="fixed inset-0 z-[2000] bg-[#f2f2f2] flex items-center justify-center p-4"
       >
-        <Breadcrumb segments={breadcrumbSegments} />
+        <AnimatePresence>
+          <Breadcrumb key="breadcrumb-lock" segments={breadcrumbSegments} />
+        </AnimatePresence>
         <div className="max-w-md w-full border border-[#111] bg-white/50 backdrop-blur-md p-10 flex flex-col items-center">
           <h2 className="font-['HYPixel'] text-2xl mb-8 text-[#111]">// ACCESS DENIED</h2>
           <p className="font-['DotPixel'] text-sm text-[#545454] mb-10 text-center tracking-tight">
@@ -119,7 +121,9 @@ export default function CityAlbum() {
       exit={{ opacity: 0 }}
       className="city-album-page"
     >
-      <Breadcrumb segments={breadcrumbSegments} />
+      <AnimatePresence>
+        <Breadcrumb key="breadcrumb-detail" segments={breadcrumbSegments} isGlass={false} />
+      </AnimatePresence>
       <PhoalbumScroll cityId={cityId} overrideFolder={cityId === 'wuhan' ? wuhanFolder : null} />
     </motion.div>
   );

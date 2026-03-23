@@ -24,10 +24,35 @@ const CITY_CONFIG = {
   'yunnan': { folder: '17云南', start: 506, end: 565, hasCover: false, prefix: 'Jerry-摄影集（不含封面封底终版）_' },
   'chongqing': { folder: '18重庆', start: 566, end: 583, hasCover: false, prefix: 'Jerry-摄影集（不含封面封底终版）_' },
   'nanjing': { folder: '19南京', start: 584, end: 795, hasCover: false, prefix: 'Jerry-摄影集（不含封面封底终版）_' },
-  'graduation': { folder: '20毕业', start: 796, end: 917, hasCover: false, prefix: 'Jerry-摄影集（不含封面封底终版）_' }
+  'graduation': { folder: '20毕业', start: 796, end: 917, hasCover: false, prefix: 'Jerry-摄影集（不含封面封底终版）_' },
+  'sketch': { folder: 'sketch', isCustom: true }
 };
 
+const SKETCH_IMAGES = [
+  "2022.04.16.JPG", "2022.04.25.JPG", "2022.04.27.JPG", "2022.04.27（2）.JPG",
+  "2022.04.29.JPG", "2022.04.29（2）.JPG", "2022.05.20.JPG", "2022.05.31.JPG",
+  "2022.06.01.JPG", "2023.08.25.JPG", "2023.08.26.JPG", "2023.08.26(2).JPG",
+  "2023.08.26(3).JPG", "2023.08.28.JPG", "2023.09.02.JPG", "2024.11.03.JPG",
+  "2025.02.26.JPG", "2025.03.02.JPG", "2025.03.03.JPG", "2025.03.06.JPG",
+  "2025.03.06(2).JPG", "2025.04.22.JPG", "2025.04.22(2).JPG", "2025.06.04.JPG",
+  "2025.07.12.JPG", "2025.07.12(2).JPG", "2025.07.22.JPG", 
+  "CamScanner 2025-7-25 01.23_11.jpg", "2025.11.06.JPG", "2025.11.07.JPG", 
+  "2025.11.27.jpg"
+];
+
 const generateItems = (cityId, overrideFolder) => {
+  if (cityId === 'sketch') {
+    const items = [];
+    // 插画/素描 跨页展示
+    for (let i = 0; i < SKETCH_IMAGES.length; i += 2) {
+      items.push({
+        type: 'spread',
+        left: `/sketch/${SKETCH_IMAGES[i]}`,
+        right: SKETCH_IMAGES[i + 1] ? `/sketch/${SKETCH_IMAGES[i + 1]}` : null
+      });
+    }
+    return items;
+  }
   if (cityId === 'overview') {
     const orderedCities = [
       'introduce', 'beijing', 'wuxi', 'suzhou', 'hangzhou', 'shanghai', 
@@ -106,11 +131,12 @@ export default function PhoalbumScroll({ cityId, overrideFolder }) {
   
   // 严格检查路径，确保视觉层（阴影、反光）只在详情页出现，不影响城市选择页 (CityPage)
   const isDetailPage = location.pathname.startsWith("/photography/") || 
-                         location.pathname.startsWith("/phoalbum/");
+                         location.pathname.startsWith("/phoalbum/") ||
+                         location.pathname.startsWith("/sketch");
 
-  // 使用 Portal 将中缝和反光挂载到 body 下，确保贯穿视口
-  const overlay = isDetailPage ? createPortal(
-    <div className="global-aesthetic-overlay">
+  // 使用 Portal 将中缝和反光挂载到 body 下，确保贯穿视口 (对于 Sketch 且由于其特殊布局，我们改用组件内的连续阴影以避免断层)
+  const overlay = (isDetailPage && cityId !== 'sketch') ? createPortal(
+    <div className={`global-aesthetic-overlay ${cityId}-mode-overlay`}>
       <div className="spine-shadow" />
       <div className="page-gloss" />
     </div>,
@@ -123,8 +149,29 @@ export default function PhoalbumScroll({ cityId, overrideFolder }) {
       <div className="paper-texture" /> 
 
       <div className="scroll-content">
-        {items.map((item, index) => (
-          <div key={index} className={`album-unit ${item.type} unit-${index} ${item.narrative ? 'has-narrative' : ''}`}>
+        {/* Sketch 页面专属：平面的 2x2 全屏 Header (贴合边缘) */}
+        {cityId === 'sketch' && (
+          <>
+            <div className="sketch-flat-header">
+              <div className="grid-row">
+                <div className="grid-cell"><img src={getAssetPath("/sketch/01.jpg")} alt="01" /></div>
+                <div className="grid-cell"><img src={getAssetPath("/sketch/02.jpg")} alt="02" /></div>
+              </div>
+              <div className="grid-row">
+                <div className="grid-cell"><img src={getAssetPath("/sketch/03.jpg")} alt="03" /></div>
+                <div className="grid-cell"><img src={getAssetPath("/sketch/04.PNG")} alt="04" /></div>
+              </div>
+            </div>
+            {/* 连续的中缝阴影和光泽（仅针对 Sketch 详情页，解决断层问题） */}
+            <div className="continuous-spine-shadow" />
+            <div className="continuous-page-gloss" />
+          </>
+        )}
+
+        <div className="book-territory-relative">
+
+          {items.map((item, index) => (
+            <div key={index} className={`album-unit ${item.type} unit-${index} ${item.narrative ? 'has-narrative' : ''}`}>
             {item.narrative && (
               <div className="page-narrative-left">
                 {item.narrative.split("\n").map((line, i) => (
@@ -142,7 +189,7 @@ export default function PhoalbumScroll({ cityId, overrideFolder }) {
                       <img src={getAssetPath(item.left)} alt={`left-${index}`} loading="lazy" />
                     </div>
                     <div className="page-img right">
-                      <img src={getAssetPath(item.right)} alt={`right-${index}`} loading="lazy" />
+                      {item.right && <img src={getAssetPath(item.right)} alt={`right-${index}`} loading="lazy" />}
                     </div>
                   </>
                 ) : (
@@ -154,8 +201,9 @@ export default function PhoalbumScroll({ cityId, overrideFolder }) {
             </div>
           </div>
         ))}
+        </div>
 
-        {/* 章节结束标识 */}
+        {/* 章节结束标识 - 移入以确保阴影覆盖 */}
         <div className="chapter-end-mark">
           — — This is the end of this chapter — —
         </div>

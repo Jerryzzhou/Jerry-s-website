@@ -8,6 +8,10 @@
   /* 移除 perspective 以免干扰 position: fixed 的视口定位 */
 }
 
+.phoalbum-scroll-container.sketch-mode {
+  background: #c4c4c4 !important;
+}
+
 .scroll-content {
   display: flex;
   flex-direction: column;
@@ -15,6 +19,13 @@
   padding: 102px 0 40px 0;
   /* 调整顶部边距，使其更贴合固定导航栏底部 */
   gap: 20px;
+  min-height: 100%; /* 确保内容至少撑满父容器，用于阴影延伸 */
+  position: relative; /* 为绝对定位的中缝阴影提供参考面 */
+}
+
+.sketch-mode .scroll-content {
+  padding-top: 0;
+  gap: 0; /* 这里的 gap 是 Header 01-04 图片与下方书页内容的间距，设为 0 以贴紧 */
 }
 
 .album-unit {
@@ -29,10 +40,18 @@
   position: relative;
   width: 100%;
   aspect-ratio: 2 / 1;
-  background: #D9D9D9;
+  background: transparent;
   box-shadow: none;
   display: flex;
   overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.sketch-mode .book-spread-container {
+  width: 100%;
+  max-width: none;
+  background: transparent;
+  box-shadow: none;
 }
 
 .images-layer {
@@ -59,11 +78,15 @@
   display: block;
 }
 
+.sketch-mode .page-img img {
+  object-fit: contain !important;
+}
+
 /* 阴影与反光图层 - 通过 Portal 挂载到 body，将其层级调至导航栏 (10001) 之下 */
 .global-aesthetic-overlay {
   position: fixed;
   inset: 0;
-  z-index: 9999;
+  z-index: 5;
   /* 低于导航栏，避免遮挡交互文字 */
   pointer-events: none;
   display: flex;
@@ -200,4 +223,104 @@
   text-align: center;
   letter-spacing: 2px;
   width: 100%;
+}
+
+/* === Sketch Page Special Header === */
+.sketch-flat-header {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #F2F2F2; /* 背景与导航栏一致 */
+  position: relative;
+  z-index: 10; /* 遮住 z-index 5 的书脊阴影 */
+  margin-top: 67px; /* 避开 Navbar 的高度以贴合其底部/面包屑 */
+}
+
+.sketch-flat-header .grid-row {
+  display: flex;
+  width: 100%;
+  overflow: hidden;
+}
+
+.sketch-flat-header .grid-cell {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.sketch-flat-header .grid-cell img {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover; /* 拼起来全宽显示 */
+}
+
+/* === Continuous Shadows for Sketch === */
+.book-territory-relative {
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px; /* 恢复为较小的间距 */
+  align-items: center;
+  flex-grow: 1; /* 撑开剩余空间，使阴影触底 */
+}
+
+.sketch-mode .book-territory-relative {
+  gap: 0; /* Sketch 插画：书页图片间无缝衔接 */
+}
+
+.continuous-spine-shadow {
+  position: absolute;
+  top: 50vw; /* 刚好处于 2x2 网格下方开始 */
+  bottom: 0;
+  left: 50%;
+  width: 100px;
+  transform: translateX(-50%);
+  background: linear-gradient(90deg,
+      rgba(0, 0, 0, 0) 0%,
+      rgba(0, 0, 0, 0.1) 25%,
+      rgba(0, 0, 0, 0.6) 49.6%,
+      rgba(0, 0, 0, 0.7) 50%,
+      rgba(0, 0, 0, 0.6) 50.4%,
+      rgba(0, 0, 0, 0.1) 75%,
+      rgba(0, 0, 0, 0) 100%);
+  z-index: 5;
+  pointer-events: none;
+}
+
+.continuous-page-gloss {
+  position: absolute;
+  top: 50vw; /* 也是从网格下方开始 */
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 6;
+  pointer-events: none;
+}
+
+.continuous-page-gloss::before,
+.continuous-page-gloss::after {
+  content: "";
+  position: absolute;
+  width: 40px;
+  height: 100%;
+  opacity: 0.3;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.3) 50%, rgba(255, 255, 255, 0) 100%);
+}
+
+.continuous-page-gloss::before {
+  left: calc(50% - 60px);
+}
+
+.continuous-page-gloss::after {
+  left: calc(50% + 20px);
+}
+
+/* 适配 Sketch 详情页的滚动外层 */
+.sketch-page .phoalbum-scroll-container {
+  height: auto;
+  min-height: 100vh;
+  overflow: visible; /* 让主页面容器负责滚动 */
 }

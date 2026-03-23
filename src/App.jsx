@@ -8,6 +8,7 @@ import About from "./pages/About";
 import Gallery from "./pages/Gallery";
 import Portfolio from "./pages/Portfolio";
 import CityAlbum from "./pages/CityAlbum";
+import Sketch from "./pages/Sketch";
 import LoadingScreen from "./components/LoadingScreen";
 
 function ScrollToTop() {
@@ -22,7 +23,7 @@ function ScrollToTop() {
     if (pathname === "/about" || pathname === "/videos") return;
     if (prevPathname === "/about" || prevPathname === "/videos") return;
 
-    const isLandingPath = (p) => p === "/" || p.startsWith("/ideas") || p.startsWith("/portfolio") || p === "/phoalbum-section" || p === "/videos-section";
+    const isLandingPath = (p) => p === "/" || p.startsWith("/ideas") || p.startsWith("/portfolio") || p === "/phoalbum-section" || p === "/videos-section" || p.startsWith("/sketch");
 
     // Explicitly ALLOW reset if we are coming FROM a sub-path (/ideas, /portfolio) TO the home path (/)
     const isReturningToHomeFromSub = pathname === "/" && (prevPathname.startsWith("/ideas") || prevPathname.startsWith("/portfolio"));
@@ -67,6 +68,7 @@ function AnimatedRoutes() {
           <Route path="/phoalbum-section" element={<LandingPage />} />
           <Route path="/videos-section" element={<LandingPage />} />
           <Route path="/gallery" element={<Gallery />} />
+          <Route path="/sketch" element={<Sketch />} />
           <Route path="/photography/:cityId" element={<CityAlbum />} />
           <Route path="/portfolio/selected" element={<Portfolio />} />
         </Routes>

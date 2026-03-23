@@ -139,7 +139,9 @@ export default function Gallery() {
       className="min-h-screen pt-32 flex flex-col items-center overflow-x-hidden" 
       style={{ background: '#F2F2F2' }}
     >
-      {isBookOpen && <Breadcrumb segments={[{ name: "City", path: "/gallery?view=overview" }, { name: "CityPage", path: null }]} />}
+      <AnimatePresence>
+        {isBookOpen && <Breadcrumb key="breadcrumb-citypage" segments={[{ name: "City", path: "/gallery?view=overview" }, { name: "CityPage", path: null }]} />}
+      </AnimatePresence>
       {/* 叠层容器：grid 在下，book 在上，视觉重合 */}
       <div className="relative w-full">
 

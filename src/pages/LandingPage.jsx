@@ -1461,15 +1461,20 @@ export default function LandingPage() {
 
                                             {/* Row 2-5: Category Options */}
                                             {[
-                                                { title: "OVERVIEW", dark: false },
-                                                { title: "PRODUCT_DESIGN", dark: false },
-                                                { title: "GRAPHIC_DESIGN", dark: false },
-                                                { title: "ILLUSTRATION / SKETCH", dark: false }
+                                                { title: "OVERVIEW", dark: false, path: "/portfolio" },
+                                                { title: "PRODUCT_DESIGN", dark: false, path: "/portfolio/product" },
+                                                { title: "GRAPHIC_DESIGN", dark: false, path: "/portfolio/graphic" },
+                                                { title: "ILLUSTRATION / SKETCH", dark: false, path: "/sketch" }
                                             ].map((cat, idx) => (
-                                                <div key={idx} className={`group cursor-pointer transition-all duration-300 flex justify-between items-center bg-white/80 hover:bg-[#111] hover:text-white ${idx !== 3 ? 'border-b border-[#111]' : ''}`} style={{ paddingLeft: "48px", paddingRight: "24px", paddingTop: "12px", paddingBottom: "12px" }}>
+                                                <Link 
+                                                    key={idx} 
+                                                    to={cat.path}
+                                                    className={`group cursor-pointer transition-all duration-300 flex justify-between items-center bg-white/80 hover:bg-[#111] hover:text-white ${idx !== 3 ? 'border-b border-[#111]' : ''}`} 
+                                                    style={{ paddingLeft: "48px", paddingRight: "24px", paddingTop: "12px", paddingBottom: "12px" }}
+                                                >
                                                     <span className="font-['HYPixel'] tracking-wider" style={{ fontSize: cat.title === 'OVERVIEW' ? '40px' : '24px' }}>{cat.title}</span>
                                                     <span className="font-['DotPixel'] text-2xl group-hover:translate-x-2 transition-transform">&gt;&gt;&gt;</span>
-                                                </div>
+                                                </Link>
                                             ))}
                                         </div>
                                     </div>

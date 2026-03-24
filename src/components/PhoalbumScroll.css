@@ -8,7 +8,8 @@
   /* 移除 perspective 以免干扰 position: fixed 的视口定位 */
 }
 
-.phoalbum-scroll-container.sketch-mode {
+.phoalbum-scroll-container.sketch-mode,
+.phoalbum-scroll-container.graphic-design-mode {
   background: #c4c4c4 !important;
 }
 
@@ -25,7 +26,11 @@
 
 .sketch-mode .scroll-content {
   padding-top: 0;
-  gap: 0; /* 这里的 gap 是 Header 01-04 图片与下方书页内容的间距，设为 0 以贴紧 */
+  gap: 0;
+}
+
+.graphic-design-mode .scroll-content {
+  padding-top: 0;
 }
 
 .album-unit {
@@ -47,11 +52,25 @@
   transition: all 0.3s ease;
 }
 
-.sketch-mode .book-spread-container {
+.sketch-mode .book-spread-container,
+.graphic-design-mode .book-spread-container {
   width: 100%;
   max-width: none;
   background: transparent;
   box-shadow: none;
+  aspect-ratio: auto !important;
+  height: auto;
+}
+
+.sketch-mode .images-layer,
+.graphic-design-mode .images-layer {
+  position: relative;
+  inset: auto;
+}
+
+.sketch-mode .page-img,
+.graphic-design-mode .page-img {
+  height: auto;
 }
 
 .images-layer {
@@ -78,7 +97,10 @@
   display: block;
 }
 
-.sketch-mode .page-img img {
+.sketch-mode .page-img img,
+.graphic-design-mode .page-img img {
+  width: 100%;
+  height: auto;
   object-fit: contain !important;
 }
 
@@ -267,13 +289,10 @@
   flex-grow: 1; /* 撑开剩余空间，使阴影触底 */
 }
 
-.sketch-mode .book-territory-relative {
-  gap: 0; /* Sketch 插画：书页图片间无缝衔接 */
-}
 
 .continuous-spine-shadow {
   position: absolute;
-  top: 50vw; /* 刚好处于 2x2 网格下方开始 */
+  top: 0;
   bottom: 0;
   left: 50%;
   width: 100px;
@@ -290,14 +309,22 @@
   pointer-events: none;
 }
 
+.sketch-mode .continuous-spine-shadow {
+  top: 50vw; /* 刚好处于 2x2 网格下方开始 */
+}
+
 .continuous-page-gloss {
   position: absolute;
-  top: 50vw; /* 也是从网格下方开始 */
+  top: 0;
   bottom: 0;
   left: 0;
   right: 0;
   z-index: 6;
   pointer-events: none;
+}
+
+.sketch-mode .continuous-page-gloss {
+  top: 50vw; /* 也是从网格下方开始 */
 }
 
 .continuous-page-gloss::before,

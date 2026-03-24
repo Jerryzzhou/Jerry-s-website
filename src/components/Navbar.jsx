@@ -28,6 +28,8 @@ export default function Navbar() {
       name: "My Works", path: "/portfolio", action: "NAV_WORKS",
       submenus: [
         { name: "Selected Works", path: "/portfolio/selected" },
+        { name: "Product Design", path: "/portfolio/product" },
+        { name: "Graphic Design", path: "/graphic-design" },
         { name: "Illustration / Sketch", path: "/sketch" }
       ]
     },
@@ -70,7 +72,7 @@ export default function Navbar() {
   }, [location.pathname]);
 
   const isDark = activeSection === "Videos" || isAboutActive || location.pathname === "/videos";
-  const isGlass = activeSection === "My Works" || activeSection === "Some Idea" || location.pathname.startsWith('/sketch');
+  const isGlass = activeSection === "My Works" || activeSection === "Some Idea" || location.pathname.startsWith('/sketch') || location.pathname.startsWith('/graphic-design');
 
   // Calculate the single "winning" active name to prevent double-line bug
   const currentActiveName = useMemo(() => {
@@ -90,7 +92,7 @@ export default function Navbar() {
     if (path.startsWith("/gallery")) return "Phoalbum";
 
     // Level 3: Initial Route fallback (before LandingPage triggers or sends signal)
-    if (path.startsWith("/portfolio") || path.startsWith("/sketch")) return "My Works";
+    if (path.startsWith("/portfolio") || path.startsWith("/sketch") || path.startsWith("/graphic-design")) return "My Works";
     if (path.startsWith("/ideas")) return "Some Idea";
 
     return null;

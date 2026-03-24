@@ -1463,7 +1463,7 @@ export default function LandingPage() {
                                             {[
                                                 { title: "OVERVIEW", dark: false, path: "/portfolio" },
                                                 { title: "PRODUCT_DESIGN", dark: false, path: "/portfolio/product" },
-                                                { title: "GRAPHIC_DESIGN", dark: false, path: "/portfolio/graphic" },
+                                                { title: "GRAPHIC_DESIGN", dark: false, path: "/graphic-design" },
                                                 { title: "ILLUSTRATION / SKETCH", dark: false, path: "/sketch" }
                                             ].map((cat, idx) => (
                                                 <Link 

@@ -25,34 +25,73 @@ const CITY_CONFIG = {
   'chongqing': { folder: '18重庆', start: 566, end: 583, hasCover: false, prefix: 'Jerry-摄影集（不含封面封底终版）_' },
   'nanjing': { folder: '19南京', start: 584, end: 795, hasCover: false, prefix: 'Jerry-摄影集（不含封面封底终版）_' },
   'graduation': { folder: '20毕业', start: 796, end: 917, hasCover: false, prefix: 'Jerry-摄影集（不含封面封底终版）_' },
-  'sketch': { folder: 'sketch', isCustom: true }
+  'sketch': { folder: 'sketch', isCustom: true },
+  'graphic-design': { folder: 'graphic_design', isCustom: true }
 };
 
 const SKETCH_IMAGES = [
-  "2022.04.16.JPG", "2022.04.25.JPG", "2022.04.27.JPG", "2022.04.27（2）.JPG",
-  "2022.04.29.JPG", "2022.04.29（2）.JPG", "2022.05.20.JPG", "2022.05.31.JPG",
-  "2022.06.01.JPG", "2023.08.25.JPG", "2023.08.26.JPG", "2023.08.26(2).JPG",
-  "2023.08.26(3).JPG", "2023.08.28.JPG", "2023.09.02.JPG", "2024.11.03.JPG",
-  "2025.02.26.JPG", "2025.03.02.JPG", "2025.03.03.JPG", "2025.03.06.JPG",
-  "2025.03.06(2).JPG", "2025.04.22.JPG", "2025.04.22(2).JPG", "2025.06.04.JPG",
-  "2025.07.12.JPG", "2025.07.12(2).JPG", "2025.07.22.JPG", 
-  "CamScanner 2025-7-25 01.23_11.jpg", "2025.11.06.JPG", "2025.11.07.JPG", 
-  "2025.11.27.jpg"
+  "2022.04.16.webp", "2022.04.25.webp", "2022.04.27.webp", "2022.04.27（2）.webp",
+  "2022.04.29.webp", "2022.04.29（2）.webp", "2022.05.20.webp", "2022.05.31.webp",
+  "2022.06.01.webp", "2023.08.25.webp", "2023.08.26.webp", "2023.08.26(2).webp",
+  "2023.08.26(3).webp", "2023.08.28.webp", "2023.09.02.webp", "2024.11.03.webp",
+  "2025.02.26.webp", "2025.03.02.webp", "2025.03.03.webp", "2025.03.06.webp",
+  "2025.03.06(2).webp", "2025.04.22.webp", "2025.04.22(2).webp", "2025.06.04.webp",
+  "2025.07.12.webp", "2025.07.12(2).webp", "2025.07.22.webp", 
+  "CamScanner 2025-7-25 01.webp", "2025.11.06.webp", "2025.11.07.webp", 
+  "2025.11.webp",
+  "插画-1临摹洛克威尔.webp", "插画-2.webp", "插画-3.webp", "插画-4.webp", "插画-7.webp"
 ];
 
 const generateItems = (cityId, overrideFolder) => {
   if (cityId === 'sketch') {
     const items = [];
-    // 插画/素描 跨页展示
-    for (let i = 0; i < SKETCH_IMAGES.length; i += 2) {
+    let i = 0;
+    while (i < SKETCH_IMAGES.length) {
+      const img = SKETCH_IMAGES[i];
+      if (img === "插画-1临摹洛克威尔.webp" || img === "插画-1临摹洛克威尔.jpg") {
+        items.push({
+          type: 'single',
+          src: `/sketch/${img}`
+        });
+        i += 1;
+      } else {
+        items.push({
+          type: 'spread',
+          left: `/sketch/${img}`,
+          right: SKETCH_IMAGES[i + 1] && SKETCH_IMAGES[i + 1] !== "插画-1临摹洛克威尔.webp" ? `/sketch/${SKETCH_IMAGES[i + 1]}` : null
+        });
+        // If the next image is NOT the full-spread one, skip the next one too. 
+        // Actually, if the next one IS the full-spread one, right will be null, and we only increment by 1.
+        if (SKETCH_IMAGES[i + 1] && SKETCH_IMAGES[i + 1] === "插画-1临摹洛克威尔.webp") {
+          i += 1;
+        } else {
+          i += 2;
+        }
+      }
+    }
+    return items;
+  }
+  
+  if (cityId === 'graphic-design') {
+    const items = [];
+    // 1. 书页版式 (1-11) - 单页展示
+    for (let i = 1; i <= 11; i++) {
+      items.push({
+        type: 'single',
+        src: `/photography/graphic_design/书页版式${i}.webp`
+      });
+    }
+    // 2. 海报 (1-18) - 左右跨页展示
+    for (let i = 1; i <= 18; i += 2) {
       items.push({
         type: 'spread',
-        left: `/sketch/${SKETCH_IMAGES[i]}`,
-        right: SKETCH_IMAGES[i + 1] ? `/sketch/${SKETCH_IMAGES[i + 1]}` : null
+        left: `/photography/graphic_design/海报${i}.webp`,
+        right: `/photography/graphic_design/海报${i + 1}.webp`
       });
     }
     return items;
   }
+
   if (cityId === 'overview') {
     const orderedCities = [
       'introduce', 'beijing', 'wuxi', 'suzhou', 'hangzhou', 'shanghai', 
@@ -66,7 +105,6 @@ const generateItems = (cityId, overrideFolder) => {
       const config = CITY_CONFIG[city];
       if (!config) return;
       const { folder, start, end, hasCover, narrative, prefix = 'Jerry-摄影集（不含封面封底终版）_' } = config;
-      // 保证武汉的图片能正常显示（使用正确的 hash 文件夹）
       const actualFolder = city === 'wuhan' ? '07wuhan_8e9bbac2a0e9cfab' : folder;
       
       if (hasCover) {
@@ -100,7 +138,6 @@ const generateItems = (cityId, overrideFolder) => {
   const items = [];
 
   if (hasCover) {
-    // 序章：使用指定的前缀（或者无前缀）
     items.push({ type: 'single', src: `/photography/${actualFolder}/${prefix}00.webp` });
     items.push({ type: 'single', src: `/photography/${actualFolder}/${prefix}01.webp`, narrative });
     for (let i = 2; i <= end; i += 2) {
@@ -111,7 +148,6 @@ const generateItems = (cityId, overrideFolder) => {
       });
     }
   } else {
-    // 城市章节：使用统一的前缀格式
     for (let i = start; i <= end; i += 2) {
       items.push({
         type: 'spread',
@@ -125,17 +161,14 @@ const generateItems = (cityId, overrideFolder) => {
 
 export default function PhoalbumScroll({ cityId, overrideFolder }) {
   const location = useLocation();
-  
-  // 根据 cityId 选择生成的数据
   const items = generateItems(cityId, overrideFolder);
   
-  // 严格检查路径，确保视觉层（阴影、反光）只在详情页出现，不影响城市选择页 (CityPage)
-  const isDetailPage = location.pathname.startsWith("/photography/") || 
-                         location.pathname.startsWith("/phoalbum/") ||
-                         location.pathname.startsWith("/sketch");
+  const isDetailPage = location.pathname.includes("/photography/") || 
+                         location.pathname.includes("/phoalbum/") ||
+                         location.pathname.includes("/sketch") ||
+                         location.pathname.includes("/graphic-design");
 
-  // 使用 Portal 将中缝和反光挂载到 body 下，确保贯穿视口 (对于 Sketch 且由于其特殊布局，我们改用组件内的连续阴影以避免断层)
-  const overlay = (isDetailPage && cityId !== 'sketch') ? createPortal(
+  const overlay = (isDetailPage && !['sketch', 'graphic-design'].includes(cityId)) ? createPortal(
     <div className={`global-aesthetic-overlay ${cityId}-mode-overlay`}>
       <div className="spine-shadow" />
       <div className="page-gloss" />
@@ -149,20 +182,26 @@ export default function PhoalbumScroll({ cityId, overrideFolder }) {
       <div className="paper-texture" /> 
 
       <div className="scroll-content">
+        {cityId === 'graphic-design' && (
+          <div className="w-full bg-[#F2F2F2]" style={{ height: '140px', flexShrink: 0, zIndex: 10 }} />
+        )}
+
         {/* Sketch 页面专属：平面的 2x2 全屏 Header (贴合边缘) */}
         {cityId === 'sketch' && (
-          <>
-            <div className="sketch-flat-header">
-              <div className="grid-row">
-                <div className="grid-cell"><img src={getAssetPath("/sketch/01.jpg")} alt="01" /></div>
-                <div className="grid-cell"><img src={getAssetPath("/sketch/02.jpg")} alt="02" /></div>
-              </div>
-              <div className="grid-row">
-                <div className="grid-cell"><img src={getAssetPath("/sketch/03.jpg")} alt="03" /></div>
-                <div className="grid-cell"><img src={getAssetPath("/sketch/04.PNG")} alt="04" /></div>
-              </div>
+          <div className="sketch-flat-header">
+            <div className="grid-row">
+              <div className="grid-cell"><img src={getAssetPath("/sketch/01.webp")} alt="01" /></div>
+              <div className="grid-cell"><img src={getAssetPath("/sketch/02.webp")} alt="02" /></div>
             </div>
-            {/* 连续的中缝阴影和光泽（仅针对 Sketch 详情页，解决断层问题） */}
+            <div className="grid-row">
+              <div className="grid-cell"><img src={getAssetPath("/sketch/03.webp")} alt="03" /></div>
+              <div className="grid-cell"><img src={getAssetPath("/sketch/04.webp")} alt="04" /></div>
+            </div>
+          </div>
+        )}
+
+        {['sketch', 'graphic-design'].includes(cityId) && (
+          <>
             <div className="continuous-spine-shadow" />
             <div className="continuous-page-gloss" />
           </>

@@ -9,6 +9,7 @@ import Gallery from "./pages/Gallery";
 import Portfolio from "./pages/Portfolio";
 import CityAlbum from "./pages/CityAlbum";
 import Sketch from "./pages/Sketch";
+import GraphicDesign from "./pages/GraphicDesign";
 import LoadingScreen from "./components/LoadingScreen";
 
 function ScrollToTop() {
@@ -69,6 +70,7 @@ function AnimatedRoutes() {
           <Route path="/videos-section" element={<LandingPage />} />
           <Route path="/gallery" element={<Gallery />} />
           <Route path="/sketch" element={<Sketch />} />
+          <Route path="/graphic-design" element={<GraphicDesign />} />
           <Route path="/photography/:cityId" element={<CityAlbum />} />
           <Route path="/portfolio/selected" element={<Portfolio />} />
         </Routes>
